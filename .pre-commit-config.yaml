@@ -1,0 +1,41 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.4.0
+    hooks:
+      - id: check-executables-have-shebangs
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: flake8
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+        args: ["--chars"," \t"]
+  - repo: https://github.com/iconmaster5326/cmake-format-pre-commit-hook
+    rev: master
+    hooks:
+      - id: cmake-format
+  - repo: https://github.com/doublify/pre-commit-clang-format
+    rev: master
+    hooks:
+      - id: clang-format
+  - repo: https://github.com/psf/black
+    rev: 19.10b0
+    hooks:
+      - id: black
+        args: ["--line-length", "79"]
+  - repo: https://github.com/timothycrosley/isort
+    rev: 4.3.19
+    hooks:
+      - id: isort
+        files: \.py$
+  - repo: https://gitlab.com/devopshq/gitlab-ci-linter
+    rev: v1.0.0
+    hooks:
+      - id: gitlab-ci-linter
+        files: \.ci/gitlab\-ci\.yaml
+        args:
+          - --server=https://git.grammatech.com
+          - --filename=.ci/gitlab-ci.yaml

@@ -1,0 +1,4 @@
+*.pyc
+__pycache__
+/build/
+/python/mcasm/version.py

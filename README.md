@@ -1,10 +1,7 @@
 # mc-asm
 
-mc-asm provides a C and Python API for turning assembly into machine code, providing rich symbolic information.
-
-## Dependencies
-
-mc-asm depends on libtinfo5 installed.
+mc-asm provides a C and Python API for turning assembly into machine code,
+providing rich symbolic information.
 
 ## Copyright and Acknowledgments
 

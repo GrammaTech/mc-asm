@@ -6,6 +6,7 @@ stages:
   - test-installers1
   - test-installers2
   - deploy
+  - deploy-pypi
 
 default:
   image: $DOCKER_REGISTRY/rewriting/templates/cpp/ubuntu20
@@ -36,16 +37,16 @@ build:
     - conan install .. --remote=gitlab
     - cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
     - make
-    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=lib
-    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=lib-dbg
-    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=dev
-    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=driver
-    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=driver-dbg
+    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=lib -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE=amd64
+    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=lib-dbg -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE=amd64
+    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=dev -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE=amd64
+    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=driver -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE=amd64
+    - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=driver-dbg -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE=amd64
 
 test:
   stage: test
   needs: [build]
-  image: conanio/gcc8
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
   script:
     - cd build
     - ctest -V
@@ -134,7 +135,24 @@ python-wheel:
   script:
     - make -t -C build
     - make -C build python-wheel
-    - cp build/python/dist/*.whl ./
+    - auditwheel repair build/python/dist/*.whl -w build/python/dist/wheelhouse
+    - cp build/python/dist/wheelhouse/*.whl ./
+
+python-wheel-pypi:
+  stage: deploy-pypi
+  needs: [python-wheel]
+  only: [master]
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
+  script:
+    - pip3 install mcasm-*.whl
+    - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__)")
+    - RESPONSE_CODE=$(curl -Ls -o /dev/null -w "%{http_code}" https://pypi.org/project/mcasm/${VERSION}/)
+    - if [ "$RESPONSE_CODE" = "404" ];
+      then
+        pip3 install twine --upgrade;
+        twine check mcasm-*.whl;
+        twine upload mcasm-*.whl -u __token__ -p $PYPI_API_KEY;
+      fi
 
 conan_package:
   stage: build

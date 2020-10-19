@@ -1,13 +1,35 @@
-FROM conanio/gcc8
+FROM quay.io/pypa/manylinux2010_x86_64
 
-RUN sudo apt-get update && sudo apt-get -y install cmake xz-utils ninja-build
+WORKDIR /gt
+
+ENV PATH="${PATH}:/opt/python/cp35-cp35m/bin/"
+
+RUN yum install -y ninja-build xz wget
+
+# The version of cmake in the manylinux2010 container is ancient (2.8), so
+# grab our own updated version.
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4.tar.gz && \
+    tar -xf cmake-3.18.4.tar.gz && \
+    rm cmake-3.18.4.tar.gz
+
+RUN cd cmake-3.18.4 && \
+    ./bootstrap --parallel=8 -- -DCMAKE_USE_OPENSSL=OFF && \
+    make -j8 && \
+    make install && \
+    cd .. && \
+    rm -rf cmake-3.18.4
+
 RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/llvm-11.0.0.src.tar.xz && \
     tar -xf llvm-11.0.0.src.tar.xz && \
     rm llvm-11.0.0.src.tar.xz
+
 RUN mkdir llvm-build && \
     cd llvm-build && \
     cmake -G Ninja ../llvm-11.0.0.src -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBXML2=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo && \
-    ninja && \
-    sudo ninja install && \
+    ninja-build && \
+    ninja-build install && \
     cd .. && \
     rm -rf llvm-build llvm-11.0.0.src
+
+# The later CI steps will need conan to be installed
+RUN pip install conan

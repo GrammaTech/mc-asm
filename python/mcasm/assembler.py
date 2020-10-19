@@ -98,7 +98,7 @@ class Assembler:
         if err not in [_MC_ERROR_SUCCESS, _MC_ERROR_FAILED_WITH_DIAGNOSTICS]:
             raise RuntimeError(self._error_string(err))
 
-        events = json.loads(data.value)
+        events = json.loads(data.value.decode())
 
         if err == _MC_ERROR_FAILED_WITH_DIAGNOSTICS:
             # Find the first error diagnostic and create an exception for it

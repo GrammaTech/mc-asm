@@ -7,7 +7,7 @@ from conans import CMake, ConanFile
 def read_version():
     fields = {}
     base_dir = os.environ.get("CI_PROJECT_DIR", None)
-    if not base_dir:
+    if not base_dir or not os.path.isabs(base_dir):
         base_dir = os.path.dirname(__file__)
     with open(os.path.join(base_dir, "version.txt")) as f:
         for line in f:

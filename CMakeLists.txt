@@ -77,9 +77,10 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
   # Enabled a sensible warning level and treat all warnings as errors.
   add_compile_options(-W4)
   add_compile_options(-WX)
+  add_compile_options(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 
-  add_compile_options(-EHsc) # Enable exceptions
   add_compile_options(-sdl) # Enable extra security checks
+  add_compile_options(-wd4146)
   add_compile_options(-permissive-) # Disable permissive mode
   add_compile_options($<$<CONFIG:Release>:-GL>) # Enable whole program
                                                 # optimization

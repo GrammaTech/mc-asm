@@ -3,6 +3,7 @@ list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 
 include(AddLLVM)
 include(LLVMConfig)
+include(HandleLLVMOptions)
 
 # Library and headers
 configure_file("${CMAKE_SOURCE_DIR}/include/mcasm/version.h.in"
@@ -29,6 +30,10 @@ set_target_properties(mcasm PROPERTIES VERSION ${mcasm_VERSION}
                                        SOVERSION ${MCASM_MAJOR_VERSION})
 
 set_target_properties(mcasm PROPERTIES CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+if(WIN32)
+  set_target_properties(mcasm PROPERTIES PREFIX "lib")
+endif()
 
 target_compile_definitions(mcasm PRIVATE MC_USE_DLL_EXPORTS)
 

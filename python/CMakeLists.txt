@@ -50,7 +50,7 @@ add_custom_target(
 execute_process(
   COMMAND
     "${PYTHON}" -c
-    "import distutils.util; print(distutils.util.get_platform().replace('-', '_').replace('.', '_'))"
+    "import distutils.util; print(distutils.util.get_platform().replace('-', '_').replace('.', '_'), end='')"
   OUTPUT_VARIABLE DIST_PLATFORM)
 add_custom_target(
   python-wheel

@@ -43,6 +43,31 @@ build:
     - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=driver -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE=amd64
     - cpack -G DEB -D CPACK_MCASM_DEBIAN_PACKAGE=driver-dbg -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE=amd64
 
+build-windows:
+  stage: build
+  tags: [mcasm-windows]
+  artifacts:
+    paths:
+      - mcasm-*.whl
+      - mcasm-*-win64
+  script:
+    - systeminfo
+    - env
+    - mkdir build
+    - cd build
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && conan install .."
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && cmake -G Ninja -DPYTHON=C:\\Python39\\python.exe -DCMAKE_BUILD_TYPE=RelWithDebInfo .."
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja"
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja python-wheel"
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ctest -V"
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && C:\\PROGRA~1\\CMake\\bin\\cpack.exe -G ZIP"
+    - ZIP_FILE=(mcasm-*-win64.zip)
+    - BASE_DIRECTORY="${ZIP_FILE%.*}"
+    - unzip $ZIP_FILE
+    - cp python/dist/mcasm-*.whl ../
+    - cp bin/*.pdb $BASE_DIRECTORY/bin/
+    - cp -r $BASE_DIRECTORY ../
+
 test:
   stage: test
   needs: [build]
@@ -140,11 +165,11 @@ python-wheel:
 
 python-wheel-pypi:
   stage: deploy-pypi
-  needs: [python-wheel]
+  needs: [python-wheel, build-windows]
   only: [master]
   image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
   script:
-    - pip3 install mcasm-*.whl
+    - pip3 install mcasm-*manylinux2010_x86_64.whl
     - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__)")
     - RESPONSE_CODE=$(curl -Ls -o /dev/null -w "%{http_code}" https://pypi.org/project/mcasm/${VERSION}/)
     - if [ "$RESPONSE_CODE" = "404" ];

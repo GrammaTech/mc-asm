@@ -55,6 +55,7 @@ build-windows:
     - env
     - mkdir build
     - cd build
+    - pip3 install twine wheel setuptools --upgrade
     - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && conan install .."
     - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && cmake -G Ninja -DPYTHON=C:\\Python39\\python.exe -DCMAKE_BUILD_TYPE=RelWithDebInfo .."
     - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja"
@@ -158,6 +159,7 @@ python-wheel:
       - mcasm-*-py*-*-*.whl
     expire_in: 1 week
   script:
+    - pip3 install twine wheel setuptools --upgrade
     - make -t -C build
     - make -C build python-wheel
     - auditwheel repair build/python/dist/*.whl -w build/python/dist/wheelhouse
@@ -177,6 +179,22 @@ python-wheel-pypi:
         pip3 install twine --upgrade;
         twine check mcasm-*.whl;
         twine upload mcasm-*.whl -u __token__ -p $PYPI_API_KEY;
+      fi
+
+python-wheel-internal-pypi:
+  stage: deploy-pypi
+  needs: [python-wheel, build-windows]
+  only: [master]
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
+  script:
+    - pip3 install twine wheel setuptools --upgrade
+    - twine check mcasm-*.whl
+    - echo 0 > exitcode.txt
+    - (twine upload --verbose --repository-url $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi --username gitlab-ci-token --password "$CI_JOB_TOKEN" mc-asm*.whl | tee response.txt) || (echo $? > exitcode.txt; exit 0)
+    # do not fail if we try to re-upload a package of the same version
+    - if [[ "$(cat exitcode.txt)" != 0 && -z "$(cat response.txt | grep "File name has already been taken")" ]];
+      then
+        exit 1;
       fi
 
 conan_package:

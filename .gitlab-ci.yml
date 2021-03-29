@@ -199,7 +199,7 @@ export_internal:
   script:
     - pip3 install -r requirements-dev.txt
     - pip3 install mcasm-*manylinux2010_x86_64.whl
-    - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__');")
+    - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__);")
     - if [[ "$VERSION" =~ \.dev[[:digit:]]*.*$ && "$CI_COMMIT_REF_NAME" =~ ^release-.* ]]; then exit 1; fi
     # this job is not using $CI_JOB_TOKEN because it only has read access
     # https://gitlab.com/gitlab-org/gitlab/-/issues/35067

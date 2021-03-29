@@ -2,7 +2,7 @@ FROM quay.io/pypa/manylinux2010_x86_64
 
 WORKDIR /gt
 
-ENV PATH="${PATH}:/opt/python/cp35-cp35m/bin/"
+ENV PATH="${PATH}:/opt/python/cp36-cp36m/bin/"
 
 RUN yum install -y ninja-build xz wget
 

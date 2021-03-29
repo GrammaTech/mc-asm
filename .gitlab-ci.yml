@@ -1,3 +1,6 @@
+variables:
+  EXTRA_INDEX_URL: https://__token__:$GL_PKG_API_TOKEN@git.grammatech.com/api/v4/projects/1587/packages/pypi/simple
+
 stages:
   - check-format
   - build
@@ -6,7 +9,7 @@ stages:
   - test-installers1
   - test-installers2
   - deploy
-  - deploy-pypi
+  - export
 
 default:
   image: $DOCKER_REGISTRY/rewriting/templates/cpp/ubuntu20
@@ -70,11 +73,9 @@ build-windows:
       - mcasm-*.whl
       - mcasm-*-win64
   script:
-    - systeminfo
-    - env
+    - pip3 install -r requirements-dev.txt
     - mkdir build
     - cd build
-    - pip3 install twine wheel setuptools --upgrade
     - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && conan install .."
     - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && cmake -G Ninja -DPYTHON=C:\\Python39\\python.exe -DCMAKE_BUILD_TYPE=RelWithDebInfo .."
     - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja"
@@ -178,43 +179,65 @@ python-wheel:
       - mcasm-*-py*-*-*.whl
     expire_in: 1 week
   script:
-    - pip3 install twine wheel setuptools --upgrade
+    - pip3 install -r requirements-dev.txt
     - make -t -C build
     - make -C build python-wheel
     - auditwheel repair build/python/dist/*.whl -w build/python/dist/wheelhouse
     - cp build/python/dist/wheelhouse/*.whl ./
 
-python-wheel-pypi:
-  stage: deploy-pypi
+# This job ensures that:
+#   - Release branches never publish -dev packages, and packages
+#     on release branches are never overwritten.  This behavior coincides
+#     with that of the external export job, where on the public pypi, packages
+#     cannot be overwritten.
+#   - main therefore only ever publishes '-dev' packages
+#   - The -dev package on main is always the newest version in the repository
+export_internal:
+  stage: export
   needs: [python-wheel, build-windows]
-  only: [master]
   image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
   script:
+    - pip3 install -r requirements-dev.txt
     - pip3 install mcasm-*manylinux2010_x86_64.whl
-    - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__)")
-    - RESPONSE_CODE=$(curl -Ls -o /dev/null -w "%{http_code}" https://pypi.org/project/mcasm/${VERSION}/)
-    - if [ "$RESPONSE_CODE" = "404" ];
-      then
-        pip3 install twine --upgrade;
-        twine check mcasm-*.whl;
-        twine upload mcasm-*.whl -u __token__ -p $PYPI_API_KEY;
+    - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__');")
+    - if [[ "$VERSION" =~ \.dev[[:digit:]]*.*$ && "$CI_COMMIT_REF_NAME" =~ ^release-.* ]]; then exit 1; fi
+    # this job is not using $CI_JOB_TOKEN because it only has read access
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/35067
+    # this job is also not using $CI_DEPLOY_USER and $CI_DEPLOY_PASSWORD because it only has write access
+    - if [[ "$CI_COMMIT_BRANCH" == "main" ]]; then
+        if [[ ! "$VERSION" =~ \.dev[[:digit:]]*$ ]]; then
+          echo "[ERROR] On the main branch, we must be exporting a -dev version."
+          exit 1;
+        fi;
+        if pip3 install --extra-index-url=$EXTRA_INDEX_URL "mcasm>$VERSION" 2>/dev/null; then
+          echo "[ERROR] The package version being published on main should always be >= the version in the repository.";
+          exit 1;
+        fi;
+        ls $CI_PROJECT_DIR/*.whl | xargs python3 $CI_PROJECT_DIR/delete_remote_packages.py $GL_PKG_API_TOKEN;
       fi
+    - sed "s/password = <access token>/password = $GL_PKG_API_TOKEN/" $CI_PROJECT_DIR/.pypirc > ~/.pypirc
+    - python3 -m twine upload --verbose --repository repypi $CI_PROJECT_DIR/*.whl
+  tags:
+    - kubernetes
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_REF_NAME =~ /^release-.*/'
 
-python-wheel-internal-pypi:
-  stage: deploy-pypi
+export_external:
+  stage: export
   needs: [python-wheel, build-windows]
-  only: [master]
   image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
   script:
-    - pip3 install twine wheel setuptools --upgrade
-    - twine check mcasm-*.whl
-    - echo 0 > exitcode.txt
-    - (twine upload --verbose --repository-url $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi --username gitlab-ci-token --password "$CI_JOB_TOKEN" mcasm-*.whl | tee response.txt) || (echo $? > exitcode.txt; exit 0)
-    # do not fail if we try to re-upload a package of the same version
-    - if [[ "$(cat exitcode.txt)" != 0 && -z "$(cat response.txt | grep "File name has already been taken")" ]];
-      then
-        exit 1;
-      fi
+    - pip3 install -r requirements-dev.txt
+    - pip3 install mcasm-*manylinux2010_x86_64.whl
+    - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__');")
+    # Do not publish .dev versions on the public pypi
+    - if [[ "$VERSION" =~ \.dev[[:digit:]]*.*$ ]]; then exit 1; fi
+    - python3 -m twine upload --verbose $CI_PROJECT_DIR/*.whl -u __token__ -p $PYPI_API_KEY
+  tags:
+    - kubernetes
+  rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^release-.*/'
 
 conan_package:
   stage: build

@@ -6,11 +6,13 @@ repos:
     hooks:
       - id: check-executables-have-shebangs
       - id: check-yaml
+        args: ["--allow-multiple-documents"]
       - id: check-merge-conflict
       - id: debug-statements
       - id: end-of-file-fixer
       - id: flake8
       - id: mixed-line-ending
+      - id: requirements-txt-fixer
       - id: trailing-whitespace
         args: ["--chars"," \t"]
   - repo: https://github.com/iconmaster5326/cmake-format-pre-commit-hook
@@ -31,11 +33,3 @@ repos:
     hooks:
       - id: isort
         files: \.py$
-  - repo: https://gitlab.com/devopshq/gitlab-ci-linter
-    rev: v1.0.0
-    hooks:
-      - id: gitlab-ci-linter
-        files: \.ci/gitlab\-ci\.yaml
-        args:
-          - --server=https://git.grammatech.com
-          - --filename=.ci/gitlab-ci.yaml

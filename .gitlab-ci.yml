@@ -230,7 +230,7 @@ export_external:
   script:
     - pip3 install -r requirements-dev.txt
     - pip3 install mcasm-*manylinux2010_x86_64.whl
-    - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__');")
+    - VERSION=$(python3 -c "import mcasm; print(mcasm.__version__);")
     # Do not publish .dev versions on the public pypi
     - if [[ "$VERSION" =~ \.dev[[:digit:]]*.*$ ]]; then exit 1; fi
     - python3 -m twine upload --verbose $CI_PROJECT_DIR/*.whl -u __token__ -p $PYPI_API_KEY

@@ -5,6 +5,7 @@
 #include <llvm/Support/JSON.h>
 
 std::unique_ptr<llvm::MCStreamer>
-createJSONStreamer(llvm::MCContext& Ctx, llvm::MCCodeEmitter& CE,
-                   llvm::MCAsmBackend& MAB, llvm::MCInstrInfo& MCII,
-                   llvm::MCRegisterInfo& MRI, llvm::json::Array& Events);
+createJSONStreamer(llvm::Triple TheTriple, llvm::MCContext& Ctx,
+                   llvm::MCCodeEmitter& CE, llvm::MCAsmBackend& MAB,
+                   llvm::MCInstrInfo& MCII, llvm::MCRegisterInfo& MRI,
+                   llvm::json::Array& Events);

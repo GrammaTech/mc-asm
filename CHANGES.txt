@@ -1,0 +1,8 @@
+0.1.3:
+- Exposed AArch64 and MIPS target-specific expressions
+
+0.1.2:
+- Added support for running on Windows
+
+0.1.1:
+- Initial public release

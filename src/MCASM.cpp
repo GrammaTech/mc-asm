@@ -204,8 +204,8 @@ MCError MCAssemblerAssembleToJSON(MCAssemblerRef Assembler, const char* Input,
 
   std::unique_ptr<MCCodeEmitter> CE(
       Assembler->TheTarget->createMCCodeEmitter(*MCII, *MRI, Ctx));
-  std::unique_ptr<MCStreamer> Str(
-      createJSONStreamer(Ctx, *CE, *MAB, *MCII, *MRI, Events));
+  std::unique_ptr<MCStreamer> Str(createJSONStreamer(
+      Assembler->TheTriple, Ctx, *CE, *MAB, *MCII, *MRI, Events));
   Str->setUseAssemblerInfoForParsing(true);
 
   std::unique_ptr<MCAsmParser> Parser(

@@ -15,3 +15,17 @@ Center, 875 N. Randolph Street, Arlington, VA 22203 under contract #
 N68335-17-C-0700.  The content of the information does not necessarily
 reflect the position or policy of the Government and no official
 endorsement should be inferred.
+
+The header files under the `src/llvm-headers/` directory are copied from the
+LLVM project and are licensed under the Apache License v2.0 with LLVM
+Exceptions (a copy of that license is included in the `src/llvm-headers/`
+directory).
+
+The following files from the open-source LLVM project are included in the
+MCASM repository.
+* Files:
+  - AArch64MCExpr.h (from `llvm/lib/Target/AArch64/MCTargetDesc/`)
+  - MipsMCExpr.h (from `llvm/lib/Target/Mips/MCTargetDesc/`)
+* Project Name: LLVM
+* Project Version: 11.0
+* License: Apache License v2.0 with LLVM Exceptions

@@ -67,7 +67,7 @@ build:
 
 build-windows:
   stage: build
-  tags: [mcasm-windows]
+  tags: [rewriting-windows]
   artifacts:
     paths:
       - mcasm-*.whl

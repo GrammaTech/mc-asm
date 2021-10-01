@@ -12,7 +12,7 @@ stages:
   - export
 
 default:
-  image: $DOCKER_REGISTRY/rewriting/templates/cpp/ubuntu20
+  image: $DOCKER_REGISTRY/research/templates/cpp/ubuntu20
   tags: ["kubernetes"]
 
 .conan_template: &conan_template |
@@ -67,7 +67,7 @@ build:
 
 build-windows:
   stage: build
-  tags: [mcasm-windows]
+  tags: [rewriting-windows]
   artifacts:
     paths:
       - mcasm-*.whl

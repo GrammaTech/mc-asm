@@ -32,6 +32,8 @@ else()
 endif()
 
 option(MCASM_ENABLE_TESTS "Enable build and running unit tests." ON)
+option(MCASM_ENABLE_MYPY "Enable checking python types with mypy." ON)
+
 if(MCASM_ENABLE_TESTS)
   enable_testing()
 endif()

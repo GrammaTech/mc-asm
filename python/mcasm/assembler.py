@@ -1,7 +1,7 @@
 import ctypes
 import enum
 import json
-import typing
+from typing import Any, Dict, List
 
 import pkg_resources
 
@@ -84,7 +84,7 @@ class Assembler:
             raise RuntimeError(self._error_string(err))
         self._x86_syntax = value
 
-    def assemble(self, asm: str) -> typing.List[dict]:
+    def assemble(self, asm: str) -> List[Dict[str, Any]]:
         """
         Assembles an assemble string into a series of events.
         :param asm: The assembly string.
@@ -98,6 +98,7 @@ class Assembler:
         if err not in [_MC_ERROR_SUCCESS, _MC_ERROR_FAILED_WITH_DIAGNOSTICS]:
             raise RuntimeError(self._error_string(err))
 
+        assert data.value, "got null pointer in success/diagnostic states"
         events = json.loads(data.value.decode())
 
         if err == _MC_ERROR_FAILED_WITH_DIAGNOSTICS:

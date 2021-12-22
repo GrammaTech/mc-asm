@@ -1,8 +1,10 @@
 flake8
 isort
+mypy
 pkginfo
 pre-commit
 pytest
 pytest-cov
 requests
 twine
+types-setuptools

@@ -1,3 +1,13 @@
+if(MCASM_ENABLE_MYPY)
+  find_program(MYPY mypy)
+  if(MYPY)
+    set(ENABLE_MYPY ON)
+  else()
+    set(ENABLE_MYPY OFF)
+    message(WARNING "mypy not found. Type checking with mypy will be disabled.")
+  endif()
+endif()
+
 file(GLOB PY_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mcams/*.py
      ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.py)
 
@@ -14,6 +24,9 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:mcasm>
           "${CMAKE_CURRENT_BINARY_DIR}/mcasm/libmcasm.so")
 
+# Create a PEP 561 py.typed to let clients find the inline type annotations.
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mcasm/py.typed "")
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in
                ${CMAKE_CURRENT_BINARY_DIR}/setup.py @ONLY)
 
@@ -25,6 +38,13 @@ if(MCASM_ENABLE_TESTS)
     NAME test-python
     COMMAND ${PYTHON} setup.py test
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/")
+
+  if(ENABLE_MYPY)
+    add_test(
+      NAME mypy
+      COMMAND mypy --config-file "${CMAKE_CURRENT_SOURCE_DIR}/mypy.ini" mcasm
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/")
+  endif()
 endif()
 
 # Move the `setup.py install` command into a separate script. This extra layer

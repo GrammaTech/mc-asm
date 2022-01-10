@@ -48,7 +48,7 @@ check-format:
 build:
   stage: build
   needs: [check-format]
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
   artifacts:
     paths:
       - build/
@@ -76,12 +76,12 @@ build-windows:
     - pip3 install -r requirements-dev.txt
     - mkdir build
     - cd build
-    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && conan install .."
-    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && cmake -G Ninja -DPYTHON=C:\\Python39\\python.exe -DCMAKE_BUILD_TYPE=RelWithDebInfo .."
-    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja"
-    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja python-wheel"
-    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ctest -V"
-    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && C:\\PROGRA~1\\CMake\\bin\\cpack.exe -G ZIP"
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && conan install .." | tee /dev/null
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && cmake -G Ninja -DPYTHON=C:\\Python39\\python.exe -DCMAKE_BUILD_TYPE=RelWithDebInfo .." | tee /dev/null
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja" | tee /dev/null
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja python-wheel" | tee /dev/null
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ctest -V" | tee /dev/null
+    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && C:\\PROGRA~1\\CMake\\bin\\cpack.exe -G ZIP" | tee /dev/null
     - ZIP_FILE=(mcasm-*-win64.zip)
     - BASE_DIRECTORY="${ZIP_FILE%.*}"
     - unzip $ZIP_FILE
@@ -92,7 +92,7 @@ build-windows:
 test:
   stage: test
   needs: [build]
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
   script:
     - cd build
     - ctest -V
@@ -172,7 +172,7 @@ deploy:
 python-wheel:
   stage: deploy
   needs: [build]
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
   artifacts:
     name: "$CI_COMMIT_REF_NAME-$CI_JOB_NAME"
     paths:
@@ -195,7 +195,7 @@ python-wheel:
 export_internal:
   stage: export
   needs: [python-wheel, build-windows]
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
   script:
     - pip3 install -r requirements-dev.txt
     - pip3 install mcasm-*manylinux2010_x86_64.whl
@@ -226,7 +226,7 @@ export_internal:
 export_external:
   stage: export
   needs: [python-wheel, build-windows]
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
   script:
     - pip3 install -r requirements-dev.txt
     - pip3 install mcasm-*manylinux2010_x86_64.whl
@@ -241,7 +241,7 @@ export_external:
 
 conan_package:
   stage: build
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm11
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
   script:
     - *conan_template
     - export CONAN_PACKAGE="mcasm/0.1@"$(echo ${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} | sed -e "s/\\//+/g")/stable

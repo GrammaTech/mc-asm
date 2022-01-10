@@ -9,9 +9,10 @@
 #include <llvm/MC/MCSectionELF.h>
 #include <llvm/MC/MCSectionMachO.h>
 #include <llvm/MC/MCStreamer.h>
+#include <llvm/Support/Casting.h>
 #include <llvm/Support/JSON.h>
 
-#if LLVM_VERSION_MAJOR == 11
+#if LLVM_VERSION_MAJOR == 13
 // These headers were copied from the LLVM release because they are not
 // packaged as part of LLVM (due to being internal to each target). When
 // updating LLVM versions, be sure to update the README as well.
@@ -28,7 +29,7 @@ public:
   JSONStreamer(Triple TargetTriple_, MCContext& Ctx_, MCCodeEmitter& CE_,
                MCAsmBackend& MAB_, MCInstrInfo& MCII_, MCRegisterInfo& MRI_,
                json::Array& Events_)
-      : TargetTriple(TargetTriple_), Ctx(Ctx_), MCStreamer(Ctx_), CE(CE_),
+      : MCStreamer(Ctx_), TargetTriple(TargetTriple_), Ctx(Ctx_), CE(CE_),
         MAB(MAB_), MCII(MCII_), MRI(MRI_), Events(Events_) {}
 
   void emitLabel(MCSymbol* Symbol, SMLoc) override {
@@ -181,6 +182,8 @@ private:
       return "NE";
     case MCBinaryExpr::Or:
       return "Or";
+    case MCBinaryExpr::OrNot:
+      return "OrNot";
     case MCBinaryExpr::Shl:
       return "Shl";
     case MCBinaryExpr::AShr:
@@ -243,7 +246,7 @@ private:
           {"lhs", ToJSON(BE->getLHS())},
           {"rhs", ToJSON(BE->getRHS())},
       };
-    } else if (auto TE = dyn_cast<MCTargetExpr>(Expr)) {
+    } else if (isa<MCTargetExpr>(Expr)) {
       if (TargetTriple.isAArch64()) {
         // This cast actually doesn't do any safety checking beyond checking
         // that it's a target expr.
@@ -321,10 +324,15 @@ private:
           {"kind", "imm"},
           {"imm", Op->getImm()},
       };
-    if (Op->isFPImm())
+    if (Op->isSFPImm())
       return json::Object{
-          {"kind", "fpImm"},
-          {"imm", Op->getFPImm()},
+          {"kind", "sfpImm"},
+          {"imm", bit_cast<float>(Op->getSFPImm())},
+      };
+    if (Op->isDFPImm())
+      return json::Object{
+          {"kind", "dfpImm"},
+          {"imm", bit_cast<double>(Op->getDFPImm())},
       };
     if (Op->isExpr())
       return json::Object{

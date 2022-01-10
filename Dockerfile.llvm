@@ -19,17 +19,17 @@ RUN cd cmake-3.18.4 && \
     cd .. && \
     rm -rf cmake-3.18.4
 
-RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/llvm-11.0.0.src.tar.xz && \
-    tar -xf llvm-11.0.0.src.tar.xz && \
-    rm llvm-11.0.0.src.tar.xz
+RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-13.0.0.src.tar.xz && \
+    tar -xf llvm-13.0.0.src.tar.xz && \
+    rm llvm-13.0.0.src.tar.xz
 
 RUN mkdir llvm-build && \
     cd llvm-build && \
-    cmake -G Ninja ../llvm-11.0.0.src -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBXML2=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo && \
+    cmake -G Ninja ../llvm-13.0.0.src -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBXML2=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo && \
     ninja-build && \
     ninja-build install && \
     cd .. && \
-    rm -rf llvm-build llvm-11.0.0.src
+    rm -rf llvm-build llvm-13.0.0.src
 
 # The later CI steps will need conan to be installed
 RUN pip install conan

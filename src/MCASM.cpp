@@ -198,9 +198,11 @@ MCError MCAssemblerAssembleToJSON(MCAssemblerRef Assembler, const char* Input,
   SrcMgr.AddNewSourceBuffer(MemoryBuffer::getMemBuffer(Input), SMLoc());
   SrcMgr.setDiagHandler(DiagCallback, &DiagCtx);
 
-  MCObjectFileInfo MOFI;
-  MCContext Ctx(MAI.get(), MRI.get(), &MOFI);
-  MOFI.InitMCObjectFileInfo(Assembler->TheTriple, /*PIC=*/false, Ctx);
+  MCContext Ctx(Assembler->TheTriple, MAI.get(), MRI.get(), STI.get(), &SrcMgr,
+                &MCOptions);
+  std::unique_ptr<MCObjectFileInfo> MOFI(
+      Assembler->TheTarget->createMCObjectFileInfo(Ctx, /*PIC=*/false));
+  Ctx.setObjectFileInfo(MOFI.get());
 
   std::unique_ptr<MCCodeEmitter> CE(
       Assembler->TheTarget->createMCCodeEmitter(*MCII, *MRI, Ctx));

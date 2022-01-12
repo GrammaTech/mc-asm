@@ -54,6 +54,7 @@ build:
       - build/
   script:
     - *conan_template
+    - pip3 install -r requirements-dev.txt
     - mkdir build
     - cd build
     - conan install .. --remote=gitlab
@@ -94,6 +95,7 @@ test:
   needs: [build]
   image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
   script:
+    - pip3 install -r requirements-dev.txt
     - cd build
     - ctest -V
 

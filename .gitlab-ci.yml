@@ -18,7 +18,7 @@ default:
 .conan_template: &conan_template |
   conan profile new default --detect && conan profile update settings.compiler.libcxx=libstdc++11 default
   conan remote add gitlab ${CI_API_V4_URL}/packages/conan
-  conan user ci_user -r gitlab -p ${CI_JOB_TOKEN}
+  CONAN_PASSWORD=${CI_JOB_TOKEN} conan user ci_user -r gitlab -p
 
 check-format:
   stage: check-format

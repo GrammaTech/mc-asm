@@ -1,4 +1,6 @@
-0.1.4 (UNRELEASED):
+0.1.5 (UNRELEASED):
+
+0.1.4:
 - Upgraded to LLVM 13.0
 - Added Python type annotations
 - Added additional information to sections

@@ -430,12 +430,26 @@ private:
   }
 
   json::Object ToJSON(const MCSection* Sect) const {
-    return json::Object{
+    json::Object Result{
         {"kind", ToJSON(Sect->getKind())},
         {"isVirtual", Sect->isVirtualSection()},
         {"alignment", Sect->getAlignment()},
         {"name", Sect->getName()},
     };
+    if (auto ELF = dyn_cast<MCSectionELF>(Sect)) {
+      Result["flags"] = ELF->getFlags();
+      Result["entrySize"] = ELF->getEntrySize();
+      Result["type"] = ELF->getType();
+      Result["class"] = "MCSectionELF";
+    } else if (auto COFF = dyn_cast<MCSectionCOFF>(Sect)) {
+      Result["characteristics"] = COFF->getCharacteristics();
+      Result["class"] = "MCSectionCOFF";
+    } else if (auto MachO = dyn_cast<MCSectionMachO>(Sect)) {
+      Result["typeAndAttributes"] = MachO->getTypeAndAttributes();
+      Result["segmentName"] = MachO->getSegmentName();
+      Result["class"] = "MCSectionMachO";
+    }
+    return Result;
   }
 
   std::string ToJSON(MCSymbolAttr Attr) const {

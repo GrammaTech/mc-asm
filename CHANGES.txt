@@ -1,4 +1,4 @@
-0.1.5 (UNRELEASED):
+0.1.5:
 - Added support for .align directives
 - Fixed building on macOS
 

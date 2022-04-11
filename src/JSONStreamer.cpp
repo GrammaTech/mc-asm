@@ -126,6 +126,27 @@ public:
     });
   }
 
+  void emitValueToAlignment(unsigned ByteAlignment, int64_t Value,
+                            unsigned ValueSize,
+                            unsigned MaxBytesToEmit) override {
+    Events.push_back(json::Object{
+        {"kind", "emitValueToAlignment"},
+        {"alignment", ByteAlignment},
+        {"value", Value},
+        {"valueSize", ValueSize},
+        {"maxBytes", MaxBytesToEmit},
+    });
+  }
+
+  void emitCodeAlignment(unsigned ByteAlignment,
+                         unsigned MaxBytesToEmit) override {
+    Events.push_back(json::Object{
+        {"kind", "emitCodeAlignment"},
+        {"alignment", ByteAlignment},
+        {"maxBytes", MaxBytesToEmit},
+    });
+  }
+
 private:
   json::Object ToJSON(const MCSymbol* Sym) const {
     assert(Sym);

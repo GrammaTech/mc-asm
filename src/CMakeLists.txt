@@ -41,7 +41,7 @@ target_compile_definitions(mcasm PRIVATE MC_USE_DLL_EXPORTS)
 #
 # Also, this is using target_link_libraries because the target_link_options does
 # not exist in older versions of CMake.
-if(UNIX)
+if(UNIX AND NOT APPLE)
   target_link_libraries(mcasm INTERFACE "-Wl,--exclude-libs,ALL")
 endif()
 

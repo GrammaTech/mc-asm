@@ -1,4 +1,6 @@
 0.1.5 (UNRELEASED):
+- Added support for .align directives
+- Fixed building on macOS
 
 0.1.4:
 - Upgraded to LLVM 13.0

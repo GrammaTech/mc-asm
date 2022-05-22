@@ -1,7 +1,7 @@
 # mc-asm
 
-mc-asm provides a C and Python API for turning assembly into machine code,
-providing rich symbolic information.
+mc-asm provides a Python API for turning assembly into machine code, providing
+rich symbolic information.
 
 ## Copyright and Acknowledgments
 

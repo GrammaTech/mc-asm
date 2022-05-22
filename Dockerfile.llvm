@@ -25,7 +25,7 @@ RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/l
 
 RUN mkdir llvm-build && \
     cd llvm-build && \
-    cmake -G Ninja ../llvm-13.0.0.src -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBXML2=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo && \
+    cmake -G Ninja ../llvm-13.0.0.src -DLLVM_ENABLE_RTTI=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBXML2=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_PARALLEL_LINK_JOBS=1 -DLLVM_USE_LINKER=gold && \
     ninja-build && \
     ninja-build install && \
     cd .. && \

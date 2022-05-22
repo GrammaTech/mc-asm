@@ -1,4 +1,7 @@
-0.1.6 (UNRELEASED):
+0.2.0 (UNRELEASED):
+- Removed the C API
+- Reworked the Python API to give even richer information by using a Python
+  extension to directly expose LLVM MC objects
 
 0.1.5:
 - Added support for .align directives

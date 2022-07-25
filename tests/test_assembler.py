@@ -119,3 +119,18 @@ def test_parse_error():
 def test_invalid_triple():
     with pytest.raises(ValueError):
         mcasm.Assembler("blah-blah-blah")
+
+
+def test_error_handling():
+    asm = mcasm.Assembler("x86_64-linux-gnu")
+    streamer = Mock(spec=mcasm.Streamer)
+    streamer.change_section = Mock(side_effect=AssertionError())
+    with pytest.raises(AssertionError):
+        asm.assemble(MockAdaptor(streamer), "ud2")
+
+    all_calls = [call[0] for call in streamer.mock_calls]
+    assert all_calls == [
+        "init_sections",
+        "change_section",
+        # emit_instruction should not be called due to the raised exception
+    ]

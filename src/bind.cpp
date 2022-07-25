@@ -51,63 +51,75 @@ public:
   emit_cfi_start_proc_impl(std::shared_ptr<ParserState> State,
                            std::shared_ptr<mc::DwarfFrameInfo> Frame) {
     State->Str->MCStreamer::emitCFIStartProcImpl(unwrap(Frame));
+    checkError();
   }
 
   virtual void
   emit_cfi_end_proc_impl(std::shared_ptr<ParserState> State,
                          std::shared_ptr<mc::DwarfFrameInfo> CurFrame) {
     State->Str->MCStreamer::emitCFIEndProcImpl(unwrap(CurFrame));
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
   virtual void emit_windows_unwind_tables(std::shared_ptr<ParserState> State, ? Frame) {
     State->Str->MCStreamer::EmitWindowsUnwindTables(?);
+    checkError();
   }
 #endif
 
   virtual void emit_windows_unwind_tables(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::EmitWindowsUnwindTables();
+    checkError();
   }
 
   virtual void emit_raw_text_impl(std::shared_ptr<ParserState> State,
                                   std::string_view String) {
     State->Str->MCStreamer::emitRawTextImpl(String);
+    checkError();
   }
 
   virtual void add_comment(std::shared_ptr<ParserState> State,
                            std::string_view T, bool EOL) {
     State->Str->MCStreamer::AddComment(T, EOL);
+    checkError();
   }
 
   virtual void emit_raw_comment(std::shared_ptr<ParserState> State,
                                 std::string_view T, bool TabPrefix) {
     State->Str->MCStreamer::emitRawComment(T, TabPrefix);
+    checkError();
   }
 
   virtual void add_explicit_comment(std::shared_ptr<ParserState> State,
                                     std::string_view T) {
     State->Str->MCStreamer::addExplicitComment(T);
+    checkError();
   }
 
   virtual void emit_explicit_comments(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitExplicitComments();
+    checkError();
   }
 
   virtual void change_section(std::shared_ptr<ParserState> State,
                               std::shared_ptr<mc::Section> Section,
                               std::shared_ptr<mc::Expr> SubSection) {
     State->Str->MCStreamer::changeSection(unwrap(Section), unwrap(SubSection));
+    checkError();
   }
 
   virtual void init_sections(std::shared_ptr<ParserState> State,
                              bool NoExecStack) {
     State->Str->MCStreamer::InitSections(NoExecStack);
+    checkError();
   }
 
   virtual void emit_label(std::shared_ptr<ParserState> State,
                           std::shared_ptr<mc::Symbol> Symbol,
                           std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::emitLabel(unwrap(Symbol), unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_eh_sym_attributes(std::shared_ptr<ParserState> State,
@@ -115,48 +127,57 @@ public:
                                       std::shared_ptr<mc::Symbol> EHSymbol) {
     State->Str->MCStreamer::emitEHSymAttributes(unwrap(Symbol),
                                                 unwrap(EHSymbol));
+    checkError();
   }
 
   virtual void emit_assembler_flag(std::shared_ptr<ParserState> State,
                                    MCAssemblerFlag Flag) {
     State->Str->MCStreamer::emitAssemblerFlag(Flag);
+    checkError();
   }
 
   virtual void emit_linker_options(std::shared_ptr<ParserState> State,
                                    std::vector<std::string>& Kind) {
     State->Str->MCStreamer::emitLinkerOptions(Kind);
+    checkError();
   }
 
   virtual void emit_data_region(std::shared_ptr<ParserState> State,
                                 MCDataRegionType Kind) {
     State->Str->MCStreamer::emitDataRegion(Kind);
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
   virtual void emit_version_min(std::shared_ptr<ParserState> State, MCVersionMinType Type, unsigned Major, unsigned Minor, unsigned Update, ? SDKVersion) {
     State->Str->MCStreamer::emitVersionMin(Type, Major, Minor, Update, ?);
+    checkError();
   }
 
   virtual void emit_build_version(std::shared_ptr<ParserState> State, unsigned Platform, unsigned Major, unsigned Minor, unsigned Update, ? SDKVersion) {
     State->Str->MCStreamer::emitBuildVersion(Platform, Major, Minor, Update, ?);
+    checkError();
   }
 #endif
 
   virtual void emit_thumb_func(std::shared_ptr<ParserState> State,
                                std::shared_ptr<mc::Symbol> Func) {
     State->Str->MCStreamer::emitThumbFunc(unwrap(Func));
+    checkError();
   }
 
   virtual void emit_assignment(std::shared_ptr<ParserState> State,
                                std::shared_ptr<mc::Symbol> Symbol,
                                std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitAssignment(unwrap(Symbol), unwrap(Value));
+    checkError();
   }
 
   virtual void emit_weak_reference(std::shared_ptr<ParserState> State,
                                    std::shared_ptr<mc::Symbol> Alias,
                                    std::shared_ptr<mc::Symbol> Symbol) {
     State->Str->MCStreamer::emitWeakReference(unwrap(Alias), unwrap(Symbol));
+    checkError();
   }
 
   virtual bool emit_symbol_attribute(std::shared_ptr<ParserState> State,
@@ -170,53 +191,63 @@ public:
                                 std::shared_ptr<mc::Symbol> Symbol,
                                 unsigned DescValue) {
     State->Str->MCStreamer::emitSymbolDesc(unwrap(Symbol), DescValue);
+    checkError();
   }
 
   virtual void begin_coff_symbol_def(std::shared_ptr<ParserState> State,
                                      std::shared_ptr<mc::Symbol> Symbol) {
     State->Str->MCStreamer::BeginCOFFSymbolDef(unwrap(Symbol));
+    checkError();
   }
 
   virtual void
   emit_coff_symbol_storage_class(std::shared_ptr<ParserState> State,
                                  int StorageClass) {
     State->Str->MCStreamer::EmitCOFFSymbolStorageClass(StorageClass);
+    checkError();
   }
 
   virtual void emit_coff_symbol_type(std::shared_ptr<ParserState> State,
                                      int Type) {
     State->Str->MCStreamer::EmitCOFFSymbolType(Type);
+    checkError();
   }
 
   virtual void end_coff_symbol_def(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::EndCOFFSymbolDef();
+    checkError();
   }
 
   virtual void emit_coff_safe_seh(std::shared_ptr<ParserState> State,
                                   std::shared_ptr<mc::Symbol> Symbol) {
     State->Str->MCStreamer::EmitCOFFSafeSEH(unwrap(Symbol));
+    checkError();
   }
 
   virtual void emit_coff_symbol_index(std::shared_ptr<ParserState> State,
                                       std::shared_ptr<mc::Symbol> Symbol) {
     State->Str->MCStreamer::EmitCOFFSymbolIndex(unwrap(Symbol));
+    checkError();
   }
 
   virtual void emit_coff_section_index(std::shared_ptr<ParserState> State,
                                        std::shared_ptr<mc::Symbol> Symbol) {
     State->Str->MCStreamer::EmitCOFFSectionIndex(unwrap(Symbol));
+    checkError();
   }
 
   virtual void emit_coff_secprel32(std::shared_ptr<ParserState> State,
                                    std::shared_ptr<mc::Symbol> Symbol,
                                    uint64_t Offset) {
     State->Str->MCStreamer::EmitCOFFSecRel32(unwrap(Symbol), Offset);
+    checkError();
   }
 
   virtual void emit_coff_imgprel32(std::shared_ptr<ParserState> State,
                                    std::shared_ptr<mc::Symbol> Symbol,
                                    int64_t Offset) {
     State->Str->MCStreamer::EmitCOFFImgRel32(unwrap(Symbol), Offset);
+    checkError();
   }
 
   virtual void emit_xcoff_local_common_symbol(
@@ -225,6 +256,7 @@ public:
       unsigned ByteAlignment) {
     State->Str->MCStreamer::emitXCOFFLocalCommonSymbol(
         unwrap(LabelSym), Size, unwrap(CsectSym), ByteAlignment);
+    checkError();
   }
 
   virtual void emit_xcoff_symbol_linkage_with_visibility(
@@ -232,18 +264,21 @@ public:
       MCSymbolAttr Linkage, MCSymbolAttr Visibility) {
     State->Str->MCStreamer::emitXCOFFSymbolLinkageWithVisibility(
         unwrap(Symbol), Linkage, Visibility);
+    checkError();
   }
 
   virtual void emit_xcoff_rename_directive(std::shared_ptr<ParserState> State,
                                            std::shared_ptr<mc::Symbol> Name,
                                            std::string_view Rename) {
     State->Str->MCStreamer::emitXCOFFRenameDirective(unwrap(Name), Rename);
+    checkError();
   }
 
   virtual void emit_elf_size(std::shared_ptr<ParserState> State,
                              std::shared_ptr<mc::Symbol> Symbol,
                              std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitELFSize(unwrap(Symbol), unwrap(Value));
+    checkError();
   }
 
   virtual void
@@ -252,6 +287,7 @@ public:
                             std::string_view Name, bool KeepOriginalSym) {
     State->Str->MCStreamer::emitELFSymverDirective(unwrap(OriginalSym), Name,
                                                    KeepOriginalSym);
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
@@ -259,12 +295,14 @@ public:
                                   MCLOHType Kind,
                                   std::shared_ptr<mc::LOHArgs> Args) {
     State->Str->MCStreamer::emitLOHDirective(unwrap(Kind), unwrap(Args));
+    checkError();
   }
 #endif
 
   virtual void emit_gnu_attribute(std::shared_ptr<ParserState> State,
                                   unsigned Tag, unsigned Value) {
     State->Str->MCStreamer::emitGNUAttribute(Tag, Value);
+    checkError();
   }
 
   virtual void emit_common_symbol(std::shared_ptr<ParserState> State,
@@ -278,6 +316,7 @@ public:
                                         uint64_t Size, unsigned ByteAlignment) {
     State->Str->MCStreamer::emitLocalCommonSymbol(unwrap(Symbol), Size,
                                                   ByteAlignment);
+    checkError();
   }
 
   virtual void emit_zero_fill(std::shared_ptr<ParserState> State,
@@ -286,6 +325,7 @@ public:
                               unsigned ByteAlignment,
                               std::shared_ptr<mc::SourceLocation> Loc) {
     // emitZeroFill is pure virtual, nothing to invoke here
+    checkError();
   }
 
   virtual void emit_tbss_symbol(std::shared_ptr<ParserState> State,
@@ -294,83 +334,99 @@ public:
                                 uint64_t Size, unsigned ByteAlignment) {
     State->Str->MCStreamer::emitTBSSSymbol(unwrap(Section), unwrap(Symbol),
                                            Size, ByteAlignment);
+    checkError();
   }
 
   virtual void emit_bytes(std::shared_ptr<ParserState> State, py::bytes Data) {
     State->Str->MCStreamer::emitBytes(static_cast<std::string_view>(Data));
+    checkError();
   }
 
   virtual void emit_binary_data(std::shared_ptr<ParserState> State,
                                 py::bytes Data) {
     State->Str->MCStreamer::emitBinaryData(static_cast<std::string_view>(Data));
+    checkError();
   }
 
   virtual void emit_value_impl(std::shared_ptr<ParserState> State,
                                std::shared_ptr<mc::Expr> Value, unsigned Size,
                                std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::emitValueImpl(unwrap(Value), Size, unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_int_value(std::shared_ptr<ParserState> State,
                               uint64_t Value, unsigned Size) {
     State->Str->MCStreamer::emitIntValue(Value, Size);
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
   virtual void emit_int_value(std::shared_ptr<ParserState> State, ? Value) {
     State->Str->MCStreamer::emitIntValue(?);
+    checkError();
   }
 #endif
 
   virtual void emit_int_value_in_hex(std::shared_ptr<ParserState> State,
                                      uint64_t Value, unsigned Size) {
     State->Str->MCStreamer::emitIntValueInHex(Value, Size);
+    checkError();
   }
 
   virtual void
   emit_int_value_in_hex_with_padding(std::shared_ptr<ParserState> State,
                                      uint64_t Value, unsigned Size) {
     State->Str->MCStreamer::emitIntValueInHexWithPadding(Value, Size);
+    checkError();
   }
 
   virtual void emit_uleb128_value(std::shared_ptr<ParserState> State,
                                   std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitULEB128Value(unwrap(Value));
+    checkError();
   }
 
   virtual void emit_sleb128_value(std::shared_ptr<ParserState> State,
                                   std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitSLEB128Value(unwrap(Value));
+    checkError();
   }
 
   virtual void emit_dtprel64_value(std::shared_ptr<ParserState> State,
                                    std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitDTPRel64Value(unwrap(Value));
+    checkError();
   }
 
   virtual void emit_dtprel32_value(std::shared_ptr<ParserState> State,
                                    std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitDTPRel32Value(unwrap(Value));
+    checkError();
   }
 
   virtual void emit_tprel64_value(std::shared_ptr<ParserState> State,
                                   std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitTPRel64Value(unwrap(Value));
+    checkError();
   }
 
   virtual void emit_tprel32_value(std::shared_ptr<ParserState> State,
                                   std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitTPRel32Value(unwrap(Value));
+    checkError();
   }
 
   virtual void emit_gprel64_value(std::shared_ptr<ParserState> State,
                                   std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitGPRel64Value(unwrap(Value));
+    checkError();
   }
 
   virtual void emit_gprel32_value(std::shared_ptr<ParserState> State,
                                   std::shared_ptr<mc::Expr> Value) {
     State->Str->MCStreamer::emitGPRel32Value(unwrap(Value));
+    checkError();
   }
 
   virtual void emit_value_fill(std::shared_ptr<ParserState> State,
@@ -379,6 +435,7 @@ public:
                                std::shared_ptr<mc::SourceLocation> Loc) {
     null_check(NumBytes);
     State->Str->MCStreamer::emitFill(*unwrap(NumBytes), FillValue, unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_expr_fill(std::shared_ptr<ParserState> State,
@@ -388,6 +445,7 @@ public:
     null_check(NumValues);
     State->Str->MCStreamer::emitFill(*unwrap(NumValues), Size, Expr,
                                      unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_nops(std::shared_ptr<ParserState> State, int64_t NumBytes,
@@ -395,6 +453,7 @@ public:
                          std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::emitNops(NumBytes, ControlledNopLength,
                                      unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_value_to_alignment(std::shared_ptr<ParserState> State,
@@ -403,12 +462,14 @@ public:
                                        unsigned MaxBytesToEmit) {
     State->Str->MCStreamer::emitValueToAlignment(ByteAlignment, Value,
                                                  ValueSize, MaxBytesToEmit);
+    checkError();
   }
 
   virtual void emit_code_alignment(std::shared_ptr<ParserState> State,
                                    unsigned ByteAlignment,
                                    unsigned MaxBytesToEmit) {
     State->Str->MCStreamer::emitCodeAlignment(ByteAlignment, MaxBytesToEmit);
+    checkError();
   }
 
   virtual void emit_value_to_offset(std::shared_ptr<ParserState> State,
@@ -417,11 +478,13 @@ public:
                                     std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::emitValueToOffset(unwrap(Offset), Value,
                                               unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_file_directive(std::shared_ptr<ParserState> State,
                                    std::string_view Filename) {
     State->Str->MCStreamer::emitFileDirective(Filename);
+    checkError();
   }
 
   virtual void emit_file_directive(std::shared_ptr<ParserState> State,
@@ -431,25 +494,31 @@ public:
                                    std::string_view Description) {
     State->Str->MCStreamer::emitFileDirective(Filename, CompilerVerion,
                                               TimeStamp, Description);
+    checkError();
   }
 
   virtual void emit_ident(std::shared_ptr<ParserState> State,
                           std::string_view IdentString) {
     State->Str->MCStreamer::emitIdent(IdentString);
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
   virtual void try_emit_dwarf_file_directive(std::shared_ptr<ParserState> State, unsigned FileNo, std::string_view Directory, std::string_view Filename, ? Checksum, ? Source, unsigned CUID) {
-    return State->Str->MCStreamer::tryEmitDwarfFileDirective(FileNo, Directory, Filename, ?, ?, CUID);
+    auto Result = State->Str->MCStreamer::tryEmitDwarfFileDirective(FileNo, Directory, Filename, ?, ?, CUID);
+    checkError();
+    return Result;
   }
 
   virtual void emit_dwarf_file_0_directive(std::shared_ptr<ParserState> State, std::string_view Directory, std::string_view Filename, ? Checksum, ? Source, unsigned CUID) {
     State->Str->MCStreamer::emitDwarfFile0Directive(Directory, Filename, ?, ?, CUID);
+    checkError();
   }
 #endif
 
   virtual void emit_cfi_b_key_frame(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitCFIBKeyFrame();
+    checkError();
   }
 
   virtual void emit_dwarf_loc_directive(std::shared_ptr<ParserState> State,
@@ -459,25 +528,31 @@ public:
                                         std::string_view FileName) {
     State->Str->MCStreamer::emitDwarfLocDirective(FileNo, Line, Column, Flags,
                                                   Isa, Discriminator, FileName);
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
   virtual void emit_cv_file_directive(std::shared_ptr<ParserState> State, unsigned FileNo, std::string_view Filename, ? Checksum, unsigned ChecksumKind) {
     return State->Str->MCStreamer::EmitCVFileDirective(FileNo, Filename, ?, ChecksumKind);
+    checkError();
   }
 #endif
 
   virtual bool emit_cv_func_id_directive(std::shared_ptr<ParserState> State,
                                          unsigned FunctionId) {
-    return State->Str->MCStreamer::EmitCVFuncIdDirective(FunctionId);
+    auto Result = State->Str->MCStreamer::EmitCVFuncIdDirective(FunctionId);
+    checkError();
+    return Result;
   }
 
   virtual bool emit_cv_inline_site_id_directive(
       std::shared_ptr<ParserState> State, unsigned FunctionId, unsigned IAFunc,
       unsigned IAFile, unsigned IALine, unsigned IACol,
       std::shared_ptr<mc::SourceLocation> Loc) {
-    return State->Str->MCStreamer::EmitCVInlineSiteIdDirective(
+    auto Result = State->Str->MCStreamer::EmitCVInlineSiteIdDirective(
         FunctionId, IAFunc, IAFile, IALine, IACol, unwrap(Loc));
+    checkError();
+    return Result;
   }
 
   virtual void emit_cv_loc_directive(std::shared_ptr<ParserState> State,
@@ -489,6 +564,7 @@ public:
     State->Str->MCStreamer::emitCVLocDirective(FunctionId, FileNo, Line, Column,
                                                PrologueEnd, IsStmt, FileName,
                                                unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_cv_line_table_directive(std::shared_ptr<ParserState> State,
@@ -497,6 +573,7 @@ public:
                                             std::shared_ptr<mc::Symbol> FnEnd) {
     State->Str->MCStreamer::emitCVLinetableDirective(
         FunctionId, unwrap(FnStart), unwrap(FnEnd));
+    checkError();
   }
 
   virtual void emit_cv_inline_line_table_directive(
@@ -507,50 +584,60 @@ public:
     State->Str->MCStreamer::emitCVInlineLinetableDirective(
         PrimaryFunctionId, SourceFileId, SourceLineNum, unwrap(FnStartSym),
         unwrap(FnEndSym));
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
   virtual void emit_cv_def_range_directive(std::shared_ptr<ParserState> State, ? Ranges, std::string_view FixedSizePortion) {
     State->Str->MCStreamer::emitCVDefRangeDirective(?, FixedSizePortion);
+    checkError();
   }
 
   virtual void emit_cv_def_range_directive(std::shared_ptr<ParserState> State, ? Ranges, ? DRHdr) {
     State->Str->MCStreamer::emitCVDefRangeDirective(?, ?);
+    checkError();
   }
 
   virtual void emit_cv_def_range_directive(std::shared_ptr<ParserState> State, ? Ranges, ? DRHdr) {
     State->Str->MCStreamer::emitCVDefRangeDirective(?, ?);
+    checkError();
   }
 
   virtual void emit_cv_def_range_directive(std::shared_ptr<ParserState> State, ? Ranges, ? DRHdr) {
     State->Str->MCStreamer::emitCVDefRangeDirective(?, ?);
+    checkError();
   }
 
   virtual void emit_cv_def_range_directive(std::shared_ptr<ParserState> State, ? Ranges, ? DRHdr) {
     State->Str->MCStreamer::emitCVDefRangeDirective(?, ?);
+    checkError();
   }
 #endif
 
   virtual void
   emit_cv_string_table_directive(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitCVStringTableDirective();
+    checkError();
   }
 
   virtual void
   emit_cv_file_checksums_directive(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitCVFileChecksumsDirective();
+    checkError();
   }
 
   virtual void
   emit_cv_file_checksum_offset_directive(std::shared_ptr<ParserState> State,
                                          unsigned FileNo) {
     State->Str->MCStreamer::emitCVFileChecksumOffsetDirective(FileNo);
+    checkError();
   }
 
   virtual void emit_cv_fpo_data(std::shared_ptr<ParserState> State,
                                 std::shared_ptr<mc::Symbol> ProcSym,
                                 std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitCVFPOData(unwrap(ProcSym), unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_absolute_symbol_diff(std::shared_ptr<ParserState> State,
@@ -559,6 +646,7 @@ public:
                                          unsigned Size) {
     State->Str->MCStreamer::emitAbsoluteSymbolDiff(unwrap(Hi), unwrap(Lo),
                                                    Size);
+    checkError();
   }
 
   virtual void
@@ -567,33 +655,40 @@ public:
                                        std::shared_ptr<mc::Symbol> Lo) {
     State->Str->MCStreamer::emitAbsoluteSymbolDiffAsULEB128(unwrap(Hi),
                                                             unwrap(Lo));
+    checkError();
   }
 
   virtual std::shared_ptr<mc::Symbol>
   get_dwarf_line_table_symbol(std::shared_ptr<ParserState> State,
                               unsigned CUID) {
-    return mc::wrap(State,
-                    State->Str->MCStreamer::getDwarfLineTableSymbol(CUID));
+    auto Result =
+        mc::wrap(State, State->Str->MCStreamer::getDwarfLineTableSymbol(CUID));
+    checkError();
+    return Result;
   }
 
   virtual void emit_cfi_sections(std::shared_ptr<ParserState> State, bool EH,
                                  bool Debug) {
     State->Str->MCStreamer::emitCFISections(EH, Debug);
+    checkError();
   }
 
   virtual void emit_cfi_def_cfa(std::shared_ptr<ParserState> State,
                                 int64_t Register, int64_t Offset) {
     State->Str->MCStreamer::emitCFIDefCfa(Register, Offset);
+    checkError();
   }
 
   virtual void emit_cfi_def_cfa_offset(std::shared_ptr<ParserState> State,
                                        int64_t Offset) {
     State->Str->MCStreamer::emitCFIDefCfaOffset(Offset);
+    checkError();
   }
 
   virtual void emit_cfi_def_cfa_register(std::shared_ptr<ParserState> State,
                                          int64_t Register) {
     State->Str->MCStreamer::emitCFIDefCfaRegister(Register);
+    checkError();
   }
 
   virtual void emit_cfi_llvm_def_aspace_cfa(std::shared_ptr<ParserState> State,
@@ -601,88 +696,106 @@ public:
                                             int64_t AddressSpace) {
     State->Str->MCStreamer::emitCFILLVMDefAspaceCfa(Register, Offset,
                                                     AddressSpace);
+    checkError();
   }
 
   virtual void emit_cfi_offset(std::shared_ptr<ParserState> State,
                                int64_t Register, int64_t Offset) {
     State->Str->MCStreamer::emitCFIOffset(Register, Offset);
+    checkError();
   }
 
   virtual void emit_cfi_personality(std::shared_ptr<ParserState> State,
                                     std::shared_ptr<mc::Symbol> Sym,
                                     unsigned Encoding) {
     State->Str->MCStreamer::emitCFIPersonality(unwrap(Sym), Encoding);
+    checkError();
   }
 
   virtual void emit_cfi_lsda(std::shared_ptr<ParserState> State,
                              std::shared_ptr<mc::Symbol> Sym,
                              unsigned Encoding) {
     State->Str->MCStreamer::emitCFILsda(unwrap(Sym), Encoding);
+    checkError();
   }
 
   virtual void emit_cfi_remember_state(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitCFIRememberState();
+    checkError();
   }
 
   virtual void emit_cfi_restore_state(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitCFIRestoreState();
+    checkError();
   }
 
   virtual void emit_cfi_same_value(std::shared_ptr<ParserState> State,
                                    int64_t Register) {
     State->Str->MCStreamer::emitCFISameValue(Register);
+    checkError();
   }
 
   virtual void emit_cfi_restore(std::shared_ptr<ParserState> State,
                                 int64_t Register) {
     State->Str->MCStreamer::emitCFIRestore(Register);
+    checkError();
   }
 
   virtual void emit_cfi_rel_offset(std::shared_ptr<ParserState> State,
                                    int64_t Register, int64_t Offset) {
     State->Str->MCStreamer::emitCFIRelOffset(Register, Offset);
+    checkError();
   }
 
   virtual void emit_cfi_adjust_cfa_offset(std::shared_ptr<ParserState> State,
                                           int64_t Adjustment) {
     State->Str->MCStreamer::emitCFIAdjustCfaOffset(Adjustment);
+    checkError();
   }
 
   virtual void emit_cfi_escape(std::shared_ptr<ParserState> State,
                                std::string_view Values) {
     State->Str->MCStreamer::emitCFIEscape(Values);
+    checkError();
   }
 
   virtual void emit_cfi_return_column(std::shared_ptr<ParserState> State,
                                       int64_t Register) {
     State->Str->MCStreamer::emitCFIReturnColumn(Register);
+    checkError();
   }
 
   virtual void emit_cfi_gnu_args_size(std::shared_ptr<ParserState> State,
                                       int64_t Size) {
     State->Str->MCStreamer::emitCFIGnuArgsSize(Size);
+    checkError();
   }
 
   virtual void emit_cfi_signal_frame(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitCFISignalFrame();
+    checkError();
   }
 
   virtual void emit_cfi_undefined(std::shared_ptr<ParserState> State,
                                   int64_t Register) {
     State->Str->MCStreamer::emitCFIUndefined(Register);
+    checkError();
   }
 
   virtual void emit_cfi_register(std::shared_ptr<ParserState> State,
                                  int64_t Register1, int64_t Register2) {
     State->Str->MCStreamer::emitCFIRegister(Register1, Register2);
+    checkError();
   }
 
   virtual void emit_cfi_window_save(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitCFIWindowSave();
+    checkError();
   }
 
   virtual void emit_cfi_negate_ra_state(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitCFINegateRAState();
+    checkError();
   }
 
   virtual void
@@ -690,35 +803,41 @@ public:
                           std::shared_ptr<mc::Symbol> Symbol,
                           std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIStartProc(unwrap(Symbol), unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_win_cfi_end_proc(std::shared_ptr<ParserState> State,
                                      std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIEndProc(unwrap(Loc));
+    checkError();
   }
 
   virtual void
   emit_win_cfi_funclet_or_func_end(std::shared_ptr<ParserState> State,
                                    std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIFuncletOrFuncEnd(unwrap(Loc));
+    checkError();
   }
 
   virtual void
   emit_win_cfi_start_chained(std::shared_ptr<ParserState> State,
                              std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIStartChained(unwrap(Loc));
+    checkError();
   }
 
   virtual void
   emit_win_cfi_end_chained(std::shared_ptr<ParserState> State,
                            std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIEndChained(unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_win_cfi_push_reg(std::shared_ptr<ParserState> State,
                                      std::shared_ptr<mc::Register> Register,
                                      std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIPushReg(unwrap(Register), unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_win_cfi_set_frame(std::shared_ptr<ParserState> State,
@@ -727,12 +846,14 @@ public:
                                       std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFISetFrame(unwrap(Register), Offset,
                                                unwrap(Loc));
+    checkError();
   }
 
   virtual void
   emit_win_cfi_alloc_stack(std::shared_ptr<ParserState> State, unsigned Size,
                            std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIAllocStack(Size, unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_win_cfi_save_reg(std::shared_ptr<ParserState> State,
@@ -741,6 +862,7 @@ public:
                                      std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFISaveReg(unwrap(Register), Offset,
                                               unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_win_cfi_save_xmm(std::shared_ptr<ParserState> State,
@@ -749,18 +871,21 @@ public:
                                      std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFISaveXMM(unwrap(Register), Offset,
                                               unwrap(Loc));
+    checkError();
   }
 
   virtual void
   emit_win_cfi_push_frame(std::shared_ptr<ParserState> State, bool Code,
                           std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIPushFrame(Code, unwrap(Loc));
+    checkError();
   }
 
   virtual void
   emit_win_cfi_end_prolog(std::shared_ptr<ParserState> State,
                           std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinCFIEndProlog(unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_win_eh_handler(std::shared_ptr<ParserState> State,
@@ -769,12 +894,14 @@ public:
                                    std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinEHHandler(unwrap(Sym), Unwind, Except,
                                              unwrap(Loc));
+    checkError();
   }
 
   virtual void
   emit_win_eh_handler_data(std::shared_ptr<ParserState> State,
                            std::shared_ptr<mc::SourceLocation> Loc) {
     State->Str->MCStreamer::EmitWinEHHandlerData(unwrap(Loc));
+    checkError();
   }
 
   virtual void emit_cg_profile_entry(std::shared_ptr<ParserState> State,
@@ -782,10 +909,12 @@ public:
                                      std::shared_ptr<mc::SymbolRefExpr> To,
                                      uint64_t Count) {
     State->Str->MCStreamer::emitCGProfileEntry(unwrap(From), unwrap(To), Count);
+    checkError();
   }
 
   virtual void emit_syntax_directive(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitSyntaxDirective();
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
@@ -795,18 +924,22 @@ public:
                        std::shared_ptr<mc::Expr> Expr,
                        std::shared_ptr<mc::SourceLocation> Loc,
                        std::shared_ptr<mc::SubtargetInfo> STI) {
-    return State->Str->MCStreamer::emitRelocDirective(
+    auto Result = State->Str->MCStreamer::emitRelocDirective(
         unwrap(Offset), Name, unwrap(Expr), unwrap(Loc), unwrap(STI));
+    checkError();
+    return Result;
   }
 #endif
 
   virtual void emit_addrsig(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitAddrsig();
+    checkError();
   }
 
   virtual void emit_addrsig_sym(std::shared_ptr<ParserState> State,
                                 std::shared_ptr<mc::Symbol> Sym) {
     State->Str->MCStreamer::emitAddrsigSym(unwrap(Sym));
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
@@ -816,30 +949,36 @@ public:
                     std::shared_ptr<mc::PseudoProbeInlineStack> InlineStack) {
     State->Str->MCStreamer::emitPseudoProbe(Guid, Index, Type, Attr,
                                             unwrap(InlineStack));
+    checkError();
   }
 #endif
 
   virtual void emit_bundle_align_mode(std::shared_ptr<ParserState> State,
                                       unsigned AlignPow2) {
     State->Str->MCStreamer::emitBundleAlignMode(AlignPow2);
+    checkError();
   }
 
   virtual void emit_bundle_lock(std::shared_ptr<ParserState> State,
                                 bool AlignToEnd) {
     State->Str->MCStreamer::emitBundleLock(AlignToEnd);
+    checkError();
   }
 
   virtual void emit_bundle_unlock(std::shared_ptr<ParserState> State) {
     State->Str->MCStreamer::emitBundleUnlock();
+    checkError();
   }
 
 #if NOT_IMPLEMENTED
   virtual void emit_dwarf_unit_length(std::shared_ptr<ParserState> State, uint64_t Length, ? Comment) {
     State->Str->MCStreamer::emitDwarfUnitLength(Length, ?);
+    checkError();
   }
 
   virtual void emit_dwarf_unit_length(std::shared_ptr<ParserState> State, ? Prefix, ? Comment) {
     return State->Str->MCStreamer::emitDwarfUnitLength(?, ?);
+    checkError();
   }
 #endif
 
@@ -847,6 +986,7 @@ public:
   emit_dwarf_line_start_label(std::shared_ptr<ParserState> State,
                               std::shared_ptr<mc::Symbol> StartSym) {
     State->Str->MCStreamer::emitDwarfLineStartLabel(unwrap(StartSym));
+    checkError();
   }
 
   virtual void
@@ -855,6 +995,7 @@ public:
                             std::shared_ptr<mc::Symbol> LastLabel) {
     State->Str->MCStreamer::emitDwarfLineEndEntry(unwrap(Section),
                                                   unwrap(LastLabel));
+    checkError();
   }
 
   virtual void emit_dwarf_advance_line_addr(
@@ -863,6 +1004,7 @@ public:
       unsigned PointerSize) {
     State->Str->MCStreamer::emitDwarfAdvanceLineAddr(
         LineDelta, unwrap(LastLabel), unwrap(Label), PointerSize);
+    checkError();
   }
 
   virtual void
@@ -870,12 +1012,20 @@ public:
                    std::shared_ptr<mc::Instruction> Inst, py::bytes Bytes,
                    std::vector<std::shared_ptr<mc::Fixup>>& Fixups) {
     State->Str->MCStreamer::emitInstruction(unwrap(Inst), *State->STI);
+    checkError();
   }
 
   virtual void diagnostic(std::shared_ptr<ParserState> State,
                           std::shared_ptr<mc::Diagnostic> Diag) {}
 
-  virtual bool had_error() { return false; }
+private:
+  void checkError() {
+    // This needs to be invoked after every call to the MCStreamer base class
+    // because it's possible it called additional Python code that set an
+    // error.
+    if (PyErr_Occurred())
+      throw py::error_already_set();
+  }
 };
 
 class PyStreamer : public StreamerBase {
@@ -1755,11 +1905,6 @@ void diagnostic(std::shared_ptr<ParserState> State,
                 std::shared_ptr<mc::Diagnostic> Diag) override {
   PYBIND11_OVERRIDE(void, StreamerBase, diagnostic, State, Diag);
 }
-
-bool had_error() override { return _had_error; }
-
-private:
-bool _had_error = false;
 };
 
 #undef DISPATCH
@@ -1767,7 +1912,6 @@ bool _had_error = false;
 class StreamerAdaptor : public FriendlyStreamer {
   std::weak_ptr<ParserState> WeakState;
   StreamerBase& Streamer;
-  bool HadError = false;
 
 public:
   StreamerAdaptor(std::shared_ptr<ParserState> State, StreamerBase& Streamer)
@@ -1786,14 +1930,12 @@ public:
       // an exception because LLVM is not exception-safe. What we'll do
       // instead is keep the Python exception set and just not call into
       // Python again.
-      if (!HadError) {
+      if (!PyErr_Occurred()) {
         try {
           return std::invoke(fn, Streamer, State, std::forward<Args>(args)...);
         } catch (py::builtin_exception& e) {
-          HadError = true;
           e.set_error();
         } catch (py::error_already_set& e) {
-          HadError = true;
           e.restore();
         }
       }
@@ -2512,8 +2654,6 @@ public:
     dispatch(&StreamerBase::diagnostic, wrap(Diag));
   }
 
-  bool hadError() { return HadError; }
-
 private:
   template <typename T>
   auto wrap(T&& Value) -> decltype(mc::wrap(WeakState.lock(), Value)) {
@@ -2586,7 +2726,7 @@ public:
     State->Parser->setTargetParser(*State->TAP);
 
     int Res = State->Parser->Run(/*NoInitialTextSection=*/false);
-    if (static_cast<StreamerAdaptor*>(State->Str.get())->hadError())
+    if (PyErr_Occurred())
       throw py::error_already_set();
     return Res == 0;
   }

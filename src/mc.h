@@ -61,7 +61,7 @@ std::shared_ptr<FixupKindInfo> wrap(std::shared_ptr<ParserState> State,
                                     const llvm::MCFixupKindInfo& FUI);
 
 std::shared_ptr<DwarfFrameInfo> wrap(std::shared_ptr<ParserState> State,
-                                     const llvm::MCDwarfFrameInfo& DFI);
+                                     llvm::MCDwarfFrameInfo* DFI);
 
 std::shared_ptr<Register> wrap(std::shared_ptr<ParserState> State,
                                llvm::MCRegister Reg);
@@ -70,7 +70,7 @@ py::object wrap(std::shared_ptr<ParserState> State, const llvm::MCOperand& Op);
 
 // unwrap declarations
 
-llvm::MCDwarfFrameInfo& unwrap(std::shared_ptr<DwarfFrameInfo> Value);
+llvm::MCDwarfFrameInfo* unwrap(std::shared_ptr<DwarfFrameInfo> Value);
 
 llvm::MCInst& unwrap(std::shared_ptr<Instruction> Value);
 
@@ -88,7 +88,7 @@ llvm::MCRegister unwrap(std::shared_ptr<Register> Value);
 
 // mc class wrappers
 
-class DwarfFrameInfo : public ValueWithState<llvm::MCDwarfFrameInfo> {
+class DwarfFrameInfo : public ValueWithState<llvm::MCDwarfFrameInfo*> {
 public:
   using ValueWithState::ValueWithState;
 };

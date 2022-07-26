@@ -50,14 +50,16 @@ public:
   virtual void
   emit_cfi_start_proc_impl(std::shared_ptr<ParserState> State,
                            std::shared_ptr<mc::DwarfFrameInfo> Frame) {
-    State->Str->MCStreamer::emitCFIStartProcImpl(unwrap(Frame));
+    null_check(Frame);
+    State->Str->MCStreamer::emitCFIStartProcImpl(*unwrap(Frame));
     checkError();
   }
 
   virtual void
   emit_cfi_end_proc_impl(std::shared_ptr<ParserState> State,
                          std::shared_ptr<mc::DwarfFrameInfo> CurFrame) {
-    State->Str->MCStreamer::emitCFIEndProcImpl(unwrap(CurFrame));
+    null_check(CurFrame);
+    State->Str->MCStreamer::emitCFIEndProcImpl(*unwrap(CurFrame));
     checkError();
   }
 
@@ -1945,11 +1947,11 @@ public:
   }
 
   void emitCFIStartProcImpl(MCDwarfFrameInfo& Frame) override {
-    dispatch(&StreamerBase::emit_cfi_start_proc_impl, wrap(Frame));
+    dispatch(&StreamerBase::emit_cfi_start_proc_impl, wrap(&Frame));
   }
 
   void emitCFIEndProcImpl(MCDwarfFrameInfo& CurFrame) override {
-    dispatch(&StreamerBase::emit_cfi_end_proc_impl, wrap(CurFrame));
+    dispatch(&StreamerBase::emit_cfi_end_proc_impl, wrap(&CurFrame));
   }
 
 #if NOT_IMPLEMENTED

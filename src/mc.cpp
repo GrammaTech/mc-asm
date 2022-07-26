@@ -93,7 +93,7 @@ std::shared_ptr<FixupKindInfo> mc::wrap(std::shared_ptr<ParserState> State,
 }
 
 std::shared_ptr<DwarfFrameInfo> mc::wrap(std::shared_ptr<ParserState> State,
-                                         const llvm::MCDwarfFrameInfo& DFI) {
+                                         llvm::MCDwarfFrameInfo* DFI) {
   return std::make_shared<DwarfFrameInfo>(State, DFI);
 }
 
@@ -120,9 +120,8 @@ py::object mc::wrap(std::shared_ptr<ParserState> State,
   return py::none();
 }
 
-llvm::MCDwarfFrameInfo& mc::unwrap(std::shared_ptr<DwarfFrameInfo> Value) {
-  null_check(Value);
-  return Value->get_raw_value();
+llvm::MCDwarfFrameInfo* mc::unwrap(std::shared_ptr<DwarfFrameInfo> Value) {
+  return Value ? Value->get_raw_value() : nullptr;
 }
 
 llvm::MCInst& mc::unwrap(std::shared_ptr<Instruction> Value) {

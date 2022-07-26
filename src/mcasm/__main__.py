@@ -15,7 +15,7 @@ except ImportError:
     sys.exit(1)
 
 
-class PrintingStreamer(mcasm.Streamer):
+class PrettyPrintingStreamer(mcasm.Streamer):
     def __init__(self):
         self._current_tree: Optional[rich.tree.Tree] = None
         self._argnames = self._extract_arg_names()
@@ -149,11 +149,18 @@ class PrintingStreamer(mcasm.Streamer):
         return result
 
 
+class NameOnlyStreamer(mcasm.Streamer):
+    def unhandled_event(self, name: str, base_impl, *args, **kwargs) -> Any:
+        print(name)
+        return super().unhandled_event(name, base_impl, *args, **kwargs)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("asm", type=argparse.FileType("r"))
     ap.add_argument("--target", default=mcasm.Assembler.default_triple())
     ap.add_argument("--syntax", choices=["intel", "att"], default="intel")
+    ap.add_argument("--names-only", action="store_true")
     args = ap.parse_args()
 
     if args.syntax == "intel":
@@ -169,7 +176,10 @@ def main() -> None:
     assembler = mcasm.Assembler(args.target)
     assembler.x86_syntax = syntax
 
-    if not assembler.assemble(PrintingStreamer(), asm):
+    if not assembler.assemble(
+        NameOnlyStreamer() if args.names_only else PrettyPrintingStreamer(),
+        asm,
+    ):
         sys.exit(1)
 
 

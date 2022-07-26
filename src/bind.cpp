@@ -2705,6 +2705,14 @@ public:
     State->Str = std::make_unique<StreamerAdaptor>(State, Streamer);
     State->Str->setUseAssemblerInfoForParsing(true);
     State->SM.setDiagHandler(&DiagCallback, State->Str.get());
+    State->Ctx->setDiagnosticHandler(
+        [WeakState = std::weak_ptr(State)](
+            const SMDiagnostic& SMD, bool IsInlineAsm, const SourceMgr& SrcMgr,
+            std::vector<const MDNode*>& LocInfos) {
+          if (auto State = WeakState.lock()) {
+            static_cast<StreamerAdaptor*>(State->Str.get())->diagCallback(SMD);
+          }
+        });
 
     State->Parser.reset(
         createMCAsmParser(State->SM, *State->Ctx, *State->Str, *State->MAI));

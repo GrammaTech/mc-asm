@@ -116,12 +116,38 @@ def test_parse_error():
     assert diag.text == "xyzzy"
 
 
+def test_context_error():
+    # Sometimes the MCContext's diagnostic handler is called instead of the
+    # source manager's. Make sure we correctly catch this too.
+    asm = mcasm.Assembler("x86_64-linux-gnu")
+    streamer = Mock(spec=mcasm.Streamer)
+    asm.assemble(MockAdaptor(streamer), ".cfi_endproc")
+
+    all_calls = [call[0] for call in streamer.mock_calls]
+    assert all_calls == [
+        "init_sections",
+        "change_section",
+        "diagnostic",
+    ]
+
+    assert streamer.diagnostic.called_once()
+    state, diag = streamer.diagnostic.call_args[0]
+    assert diag.kind == mcasm.mc.Diagnostic.Kind.Error
+    assert diag.lineno == 1
+    assert diag.offset == 0
+    assert diag.message == (
+        "this directive must appear between .cfi_startproc and .cfi_endproc "
+        "directives"
+    )
+    assert diag.text == ".cfi_endproc"
+
+
 def test_invalid_triple():
     with pytest.raises(ValueError):
         mcasm.Assembler("blah-blah-blah")
 
 
-def test_error_handling():
+def test_python_exceptions():
     asm = mcasm.Assembler("x86_64-linux-gnu")
     streamer = Mock(spec=mcasm.Streamer)
     streamer.change_section = Mock(side_effect=AssertionError())

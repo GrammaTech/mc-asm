@@ -1,75 +1,39 @@
-# Need 3.10 to support CXX_STANDARD=17
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.15...3.22)
 
-# Read version.txt and setup project
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/version.txt" VERSION_FILE)
-
-string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${VERSION_FILE})
-set(MCASM_MAJOR_VERSION ${CMAKE_MATCH_1})
-
-string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${VERSION_FILE})
-set(MCASM_MINOR_VERSION ${CMAKE_MATCH_1})
-
-string(REGEX MATCH "VERSION_PATCH ([0-9]*)" _ ${VERSION_FILE})
-set(MCASM_PATCH_VERSION ${CMAKE_MATCH_1})
-
-cmake_policy(SET CMP0048 NEW)
-project(
-  mcasm
-  VERSION "${MCASM_MAJOR_VERSION}.${MCASM_MINOR_VERSION}.${MCASM_PATCH_VERSION}"
-)
+project(mcasm)
 
 # ---------------------------------------------------------------------------
-# Build options
+# CMake dependencies
 # ---------------------------------------------------------------------------
 
-# Wrapper for BUILD_SHARED_LIBS which defaults to 'ON'
-option(MCASM_BUILD_SHARED_LIBS "Build shared libraries." ON)
-if(MCASM_BUILD_SHARED_LIBS)
-  set(BUILD_SHARED_LIBS ON)
-else()
-  set(BUILD_SHARED_LIBS OFF)
+if(SKBUILD)
+  # Scikit-Build does not add your site-packages to the search path
+  # automatically, so we need to add it _or_ the pybind11 specific directory
+  # here.
+  execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c
+            "import pybind11; print(pybind11.get_cmake_dir())"
+    OUTPUT_VARIABLE _tmp_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT)
+  list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
 endif()
 
-option(MCASM_ENABLE_TESTS "Enable build and running unit tests." ON)
-option(MCASM_ENABLE_MYPY "Enable checking python types with mypy." ON)
+# Now we can find pybind11
+find_package(pybind11 CONFIG REQUIRED)
 
-if(MCASM_ENABLE_TESTS)
-  enable_testing()
-endif()
+find_package(LLVM 13 CONFIG REQUIRED)
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 
-# ---------------------------------------------------------------------------
-# Global settings
-# ---------------------------------------------------------------------------
-
-# set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Use C++17
-set(CMAKE_CXX_STANDARD 17)
-# Error if it's not available
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(WIN32)
-  set(CMAKE_DEBUG_POSTFIX
-      "d"
-      CACHE STRING "add a postfix, usually d on windows")
-endif()
-set(CMAKE_RELEASE_POSTFIX
-    ""
-    CACHE STRING "add a postfix, usually empty on windows")
-set(CMAKE_RELWITHDEBINFO_POSTFIX
-    ""
-    CACHE STRING "add a postfix, usually empty on windows")
-set(CMAKE_MINSIZEREL_POSTFIX
-    ""
-    CACHE STRING "add a postfix, usually empty on windows")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+include(AddLLVM)
+include(LLVMConfig)
+include(HandleLLVMOptions)
 
 # ---------------------------------------------------------------------------
 # Compile options
 # ---------------------------------------------------------------------------
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
   add_compile_options(-D_MBCS)
   add_compile_options(-D_UNICODE)
@@ -94,15 +58,13 @@ elseif((${CMAKE_CXX_COMPILER_ID} STREQUAL GNU) OR (${CMAKE_CXX_COMPILER_ID}
   add_compile_options(-fPIC)
 endif()
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
 # ---------------------------------------------------------------------------
-# Source files
+# Debug info
 # ---------------------------------------------------------------------------
 function(install_linux_debug_info TARGET COMPONENT_NAME)
   if(UNIX
      AND NOT CYGWIN
+     AND NOT APPLE
      AND ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo"
           OR "${CMAKE_BUILD_TYPE}" STREQUAL "Debug"))
     string(
@@ -125,62 +87,39 @@ function(install_linux_debug_info TARGET COMPONENT_NAME)
   endif()
 endfunction()
 
-# Add src subdirectory which contains targets
-add_subdirectory(src)
+# ---------------------------------------------------------------------------
+# Extension target
+# ---------------------------------------------------------------------------
+pybind11_add_module(_core MODULE src/bind.cpp src/mc.cpp)
 
-find_program(PYTHON "python3")
-if(PYTHON)
-  add_subdirectory(python)
-else()
-  message(
-    WARNING
-      "Python interpreter not found; disabling building of Python API.
-If this is in error, try giving -DPYTHON=... to CMake to specify what program to use."
-  )
+llvm_config(
+  _core
+  AllTargetsAsmParsers
+  AllTargetsDescs
+  AllTargetsInfos
+  MC
+  MCParser
+  Support)
+
+# We unfortunately need a version of LLVM built with RTTI. We need RTTI for our
+# library due to pybind11 and because we inherit from an LLVM class
+# (MCStreamer), we can end up with a reference to LLVM RTTI.
+#
+# It _might_ be possible to get around this by ensuring that StreamerAdaptor's
+# vtable gets emitted in a file with -fno-rtti, but it's not that big a problem
+# (yet?).
+if(NOT LLVM_ENABLE_RTTI)
+  message("LLVM must be built with RTTI (-DLLVM_ENABLE_RTTI=ON)" FATAL_ERROR)
 endif()
 
-# ---------------------------------------------------------------------------
-# Export config for use by other CMake projects
-# ---------------------------------------------------------------------------
-export(TARGETS mcasm FILE "${CMAKE_CURRENT_BINARY_DIR}/mcasmTargets.cmake")
+# LLVM probably was not built with exception handling, but our code needs to be
+# for pybind11. This is okay because we're careful not to propogate exceptions
+# through LLVM frames.
+set(LLVM_ENABLE_EH ON)
 
-# Build tree config
-configure_file("${CMAKE_CURRENT_LIST_DIR}/mcasmConfig.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/mcasmConfig.cmake")
+llvm_update_compile_flags(_core)
 
-# Install tree config
-configure_file("${CMAKE_CURRENT_LIST_DIR}/mcasmConfig.cmake.in"
-               "${CMAKE_CURRENT_BINARY_DIR}/export/mcasmConfig.cmake")
-install(
-  FILES ${CMAKE_CURRENT_BINARY_DIR}/export/mcasmConfig.cmake
-  DESTINATION lib/mcasm
-  COMPONENT cmake_config)
-install(
-  EXPORT mcasmTargets
-  DESTINATION lib/mcasm
-  COMPONENT cmake_target)
+target_include_directories(_core SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
 
-export(PACKAGE mcasm)
-
-# ---------------------------------------------------------------------------
-# Debian package generation
-# ---------------------------------------------------------------------------
-set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/cpack-config.cmake)
-
-set(CMAKE_PROJECT_HOMEPAGE_URL
-    https://git.grammatech.com/rewriting/Templates/CMake)
-
-set(CPACK_PACKAGE_VERSION_MAJOR ${MCASM_MAJOR_VERSION})
-set(CPACK_PACKAGE_VERSION_MINOR ${MCASM_MINOR_VERSION})
-set(CPACK_PACKAGE_VERSION_PATCH ${MCASM_PATCH_VERSION})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Package description")
-set(CPACK_PACKAGE_VENDOR "GrammaTech Inc.")
-set(CPACK_PACKAGE_CONTACT someone@grammatech.com)
-set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/README.md)
-set(CPACK_PACKAGE_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt)
-
-set(CPACK_DEBIAN_PACKAGE_SECTION devel)
-
-set(CPACK_MCASM_VERSION "${mcasm_VERSION}")
-
-include(CPack)
+install(TARGETS _core DESTINATION .)
+install_linux_debug_info(_core _core-debug-file)

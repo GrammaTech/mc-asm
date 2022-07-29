@@ -1,4 +1,6 @@
 *.pyc
 __pycache__
+/.pytest_cache
+/.vscode
+/_skbuild/
 /build/
-/python/mcasm/version.py

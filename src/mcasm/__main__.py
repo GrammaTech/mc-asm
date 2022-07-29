@@ -156,11 +156,28 @@ class NameOnlyStreamer(mcasm.Streamer):
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("asm", type=argparse.FileType("r"))
-    ap.add_argument("--target", default=mcasm.Assembler.default_triple())
-    ap.add_argument("--syntax", choices=["intel", "att"], default="intel")
-    ap.add_argument("--names-only", action="store_true")
+    ap = argparse.ArgumentParser(
+        description="parse an assembly file and print out the mc-asm callbacks"
+    )
+    ap.add_argument(
+        "asm", type=argparse.FileType("r"), help="the assembly file to parse"
+    )
+    ap.add_argument(
+        "--target",
+        default=mcasm.Assembler.default_triple(),
+        help="the target triple to use (default: %(default)s)",
+    )
+    ap.add_argument(
+        "--syntax",
+        choices=["intel", "att"],
+        default="intel",
+        help="the syntax to use (default: %(default)s)",
+    )
+    ap.add_argument(
+        "--names-only",
+        action="store_true",
+        help="only print the callback names instead of the detailed output",
+    )
     args = ap.parse_args()
 
     if args.syntax == "intel":

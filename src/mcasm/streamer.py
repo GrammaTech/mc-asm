@@ -19,6 +19,10 @@ class Streamer(_Streamer):
         super().__init__()
 
     def _add_unhandled_overrides(self) -> None:
+        """
+        Adds overrides for all unhandled streamer callbacks. The overrides
+        will call unhandled_event.
+        """
         for name in dir(_Streamer):
             self_attr = getattr(self, name)
             base_attr = getattr(_Streamer, name)

@@ -1,4 +1,6 @@
-0.2.0 (UNRELEASED):
+0.2.1 (UNRELEASED):
+
+0.2.0:
 - Removed the C API
 - Reworked the Python API to give even richer information by using a Python
   extension to directly expose LLVM MC objects

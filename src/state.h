@@ -23,10 +23,10 @@
 #include <llvm/Support/TargetSelect.h>
 #include <memory>
 
-class StreamerBase;
+class PyStreamer;
 
 class FriendlyStreamer : public llvm::MCStreamer {
-  friend StreamerBase;
+  friend PyStreamer;
   using llvm::MCStreamer::MCStreamer;
 };
 

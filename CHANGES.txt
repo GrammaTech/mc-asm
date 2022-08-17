@@ -1,4 +1,6 @@
 0.2.1 (UNRELEASED):
+- Fixed a performance regression added in 0.2.0 that caused creating Assembler
+  objects to be noticably slower
 
 0.2.0:
 - Removed the C API

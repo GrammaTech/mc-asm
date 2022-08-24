@@ -95,6 +95,31 @@ def test_data():
     assert bytes == b"*"
 
 
+def test_anon_symbol():
+    asm = mcasm.Assembler("x86_64-linux-gnu")
+    streamer = Mock(spec=mcasm.Streamer)
+    assert asm.assemble(MockAdaptor(streamer), "x=.")
+
+    all_calls = [call[0] for call in streamer.mock_calls]
+    assert all_calls == [
+        "init_sections",
+        "change_section",
+        "emit_label",
+        "emit_assignment",
+    ]
+
+    assert streamer.emit_label.called_once()
+    state, label_symbol, loc = streamer.emit_label.call_args[0]
+    assert label_symbol.name
+    assert label_symbol.is_temporary
+
+    assert streamer.emit_assignment.called_once()
+    state, assignment_symbol, value = streamer.emit_assignment.call_args[0]
+    assert assignment_symbol.name == "x"
+    assert isinstance(value, mcasm.mc.SymbolRefExpr)
+    assert value.symbol.name == label_symbol.name
+
+
 def test_parse_error():
     asm = mcasm.Assembler("x86_64-linux-gnu")
     streamer = Mock(spec=mcasm.Streamer)

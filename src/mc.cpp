@@ -72,9 +72,9 @@ std::shared_ptr<Diagnostic> mc::wrap(std::shared_ptr<ParserState> State,
   return std::make_shared<Diagnostic>(State, Diag);
 }
 
-std::shared_ptr<Instruction> mc::wrap(std::shared_ptr<ParserState> State,
-                                      const llvm::MCInst& Inst) {
-  return std::make_shared<Instruction>(State, Inst);
+std::shared_ptr<mc::Instruction> mc::wrap(std::shared_ptr<ParserState> State,
+                                          const llvm::MCInst& Inst) {
+  return std::make_shared<mc::Instruction>(State, Inst);
 }
 
 std::shared_ptr<InstructionDesc> mc::wrap(std::shared_ptr<ParserState> State,

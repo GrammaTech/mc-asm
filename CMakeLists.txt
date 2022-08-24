@@ -21,7 +21,7 @@ endif()
 # Now we can find pybind11
 find_package(pybind11 CONFIG REQUIRED)
 
-find_package(LLVM 13 CONFIG REQUIRED)
+find_package(LLVM 14 CONFIG REQUIRED)
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 
 include(AddLLVM)

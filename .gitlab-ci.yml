@@ -36,7 +36,7 @@ check-format:
 build-linux:
   stage: build
   needs: [check-format]
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13-RTTI
+  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:14
   artifacts:
     name: "$CI_COMMIT_REF_NAME-$CI_JOB_NAME"
     paths:
@@ -53,7 +53,7 @@ build-linux:
 
 build-windows:
   stage: build
-  tags: [rewriting-windows]
+  tags: [mcasm-windows]
   artifacts:
     paths:
       - mcasm*.whl

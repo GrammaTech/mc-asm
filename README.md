@@ -27,5 +27,5 @@ MCASM repository.
   - AArch64MCExpr.h (from `llvm/lib/Target/AArch64/MCTargetDesc/`)
   - MipsMCExpr.h (from `llvm/lib/Target/Mips/MCTargetDesc/`)
 * Project Name: LLVM
-* Project Version: 13.0
+* Project Version: 14.0.6
 * License: Apache License v2.0 with LLVM Exceptions

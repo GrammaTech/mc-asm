@@ -105,7 +105,7 @@ test-linux-py310:
 export_internal:
   stage: export
   needs: [build-linux, build-windows]
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
+  image: python:3.7-slim
   script:
     - pip3 install -r requirements-dev.txt
     - pip3 install --no-index --find-links ./ mcasm
@@ -136,7 +136,7 @@ export_internal:
 export_external:
   stage: export
   needs: [build-linux, build-windows]
-  image: $DOCKER_REGISTRY/rewriting/mc-asm/llvm:13
+  image: python:3.7-slim
   script:
     - pip3 install -r requirements-dev.txt
     - pip3 install --no-index --find-links ./ mcasm

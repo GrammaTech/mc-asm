@@ -14,11 +14,11 @@
 #include <llvm/MC/MCSectionMachO.h>
 #include <llvm/MC/MCStreamer.h>
 #include <llvm/MC/MCSubtargetInfo.h>
+#include <llvm/MC/TargetRegistry.h>
 #include <llvm/Support/Host.h>
 #include <llvm/Support/JSON.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
-#include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/TargetSelect.h>
 #include <memory>
 
@@ -222,7 +222,7 @@ void init_sections(std::shared_ptr<ParserState> State, bool NoExecStack) {
   py_dispatch(
       __func__,
       [](std::shared_ptr<ParserState> State, bool NoExecStack) {
-        State->Str->MCStreamer::InitSections(NoExecStack);
+        State->Str->MCStreamer::initSections(NoExecStack, *State->STI);
       },
       State, NoExecStack);
 }
@@ -782,7 +782,7 @@ void emit_nops(std::shared_ptr<ParserState> State, int64_t NumBytes,
       [](std::shared_ptr<ParserState> State, int64_t NumBytes,
          int64_t ControlledNopLength, std::shared_ptr<mc::SourceLocation> Loc) {
         State->Str->MCStreamer::emitNops(NumBytes, ControlledNopLength,
-                                         unwrap(Loc));
+                                         unwrap(Loc), *State->STI);
       },
       State, NumBytes, ControlledNopLength, Loc);
 }
@@ -806,8 +806,8 @@ void emit_code_alignment(std::shared_ptr<ParserState> State,
       __func__,
       [](std::shared_ptr<ParserState> State, unsigned ByteAlignment,
          unsigned MaxBytesToEmit) {
-        State->Str->MCStreamer::emitCodeAlignment(ByteAlignment,
-                                                  MaxBytesToEmit);
+        State->Str->MCStreamer::emitCodeAlignment(
+            ByteAlignment, State->STI.get(), MaxBytesToEmit);
       },
       State, ByteAlignment, MaxBytesToEmit);
 }
@@ -1764,7 +1764,7 @@ public:
     dispatch(&PyStreamer::change_section, wrap(Section), wrap(SubSection));
   }
 
-  void InitSections(bool NoExecStack) override {
+  void initSections(bool NoExecStack, const MCSubtargetInfo& STI) override {
     dispatch(&PyStreamer::init_sections, NoExecStack);
   }
 
@@ -1999,8 +1999,8 @@ public:
              wrap(Loc));
   }
 
-  void emitNops(int64_t NumBytes, int64_t ControlledNopLength,
-                SMLoc Loc) override {
+  void emitNops(int64_t NumBytes, int64_t ControlledNopLength, SMLoc Loc,
+                const MCSubtargetInfo& STI) override {
     dispatch(&PyStreamer::emit_nops, NumBytes, ControlledNopLength, wrap(Loc));
   }
 
@@ -2011,7 +2011,7 @@ public:
              ValueSize, MaxBytesToEmit);
   }
 
-  void emitCodeAlignment(unsigned ByteAlignment,
+  void emitCodeAlignment(unsigned ByteAlignment, const MCSubtargetInfo* STI,
                          unsigned MaxBytesToEmit = 0) override {
     dispatch(&PyStreamer::emit_code_alignment, ByteAlignment, MaxBytesToEmit);
   }

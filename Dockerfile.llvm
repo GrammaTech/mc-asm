@@ -19,17 +19,22 @@ RUN cd cmake-3.18.4 && \
     cd .. && \
     rm -rf cmake-3.18.4
 
-RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-13.0.0.src.tar.xz && \
-    tar -xf llvm-13.0.0.src.tar.xz && \
-    rm llvm-13.0.0.src.tar.xz
+RUN wget https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/llvm-14.0.6.src.tar.xz && \
+    tar -xf llvm-14.0.6.src.tar.xz && \
+    rm llvm-14.0.6.src.tar.xz
 
 RUN mkdir llvm-build && \
     cd llvm-build && \
-    cmake -G Ninja ../llvm-13.0.0.src -DLLVM_ENABLE_RTTI=ON -DLLVM_ENABLE_ZLIB=OFF -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_LIBXML2=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_PARALLEL_LINK_JOBS=1 -DLLVM_USE_LINKER=gold && \
+    cmake -G Ninja ../llvm-14.0.6.src \
+        -DLLVM_ENABLE_RTTI=ON \
+        -DLLVM_ENABLE_ZLIB=OFF \
+        -DLLVM_ENABLE_TERMINFO=OFF \
+        -DLLVM_ENABLE_LIBXML2=OFF \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DLLVM_PARALLEL_LINK_JOBS=1 \
+        -DLLVM_INCLUDE_BENCHMARKS=OFF \
+        -DLLVM_LINK_LLVM_DYLIB=ON && \
     ninja-build && \
     ninja-build install && \
     cd .. && \
-    rm -rf llvm-build llvm-13.0.0.src
-
-# The later CI steps will need conan to be installed
-RUN pip install conan
+    rm -rf llvm-build llvm-14.0.6.src

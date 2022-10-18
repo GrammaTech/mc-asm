@@ -2462,6 +2462,7 @@ public:
     State->MOFI.reset(
         TheTarget->createMCObjectFileInfo(*State->Ctx, /*PIC=*/false));
     State->Ctx->setObjectFileInfo(State->MOFI.get());
+    State->Ctx->setUseNamesOnTempLabels(true);
 
     State->CE.reset(
         TheTarget->createMCCodeEmitter(*State->MCII, *State->MRI, *State->Ctx));

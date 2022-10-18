@@ -40,7 +40,7 @@ class Streamer:
         self, state: ParserState, symbol: mc.Symbol
     ) -> None: ...
     def change_section(
-        self, state: ParserState, section: mc.Section, subsection: mc.Expr
+        self, state: ParserState, section: mc.Section, subsection: typing.Optional[mc.Expr]
     ) -> None: ...
     def diagnostic(self, state: ParserState, diag: mc.Diagnostic) -> None: ...
     def emit_absolute_symbol_diff(
@@ -284,7 +284,7 @@ class Streamer:
         self,
         state: ParserState,
         inst: mc.Instruction,
-        bytes: bytes,
+        data: bytes,
         fixups: typing.List[mc.Fixup],
     ) -> None: ...
     def emit_int_value(

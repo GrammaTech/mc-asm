@@ -3004,7 +3004,7 @@ PYBIND11_MODULE(_core, m) {
 
       .def("emit_instruction",
            &PyStreamer::emit_instruction,
-           "state"_a, "inst"_a, "bytes"_a, "fixups"_a)
+           "state"_a, "inst"_a, "data"_a, "fixups"_a)
       .def("diagnostic",
            &PyStreamer::diagnostic,
            "state"_a, "diag"_a)

@@ -1,0 +1,66 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "gusztavvargadr/windows-10"
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 8192
+    v.cpus = 4
+  end
+
+  config.vm.provision "setup-gitlab-requirements", type: "shell", inline: <<-SHELL
+    cd $HOME
+    Invoke-WebRequest https://www.cygwin.com/setup-x86_64.exe -OutFile setup-x86_64.exe
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = "C:\\Users\\vagrant\\setup-x86_64.exe"
+    $startInfo.Arguments = "--no-shortcuts --no-desktop -q --site http://cygwin.mirror.constant.com --packages git,cygrunsrv,openssh,zip,unzip"
+    $startInfo.UseShellExecute = $true
+    $startInfo.CreateNoWindow = $false
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    $process.Start()
+    $process.WaitForExit()
+    C:\\cygwin64\\bin\\bash.exe --login -c "/bin/ssh-host-config -y -c ntsec -p 22"
+    C:\\cygwin64\\bin\\bash.exe --login -c "net stop sshd"
+    cmd.exe /C "sc config ""sshd"" start= disabled"
+    C:\\cygwin64\\bin\\bash.exe --login -c "net start cygsshd"
+    cmd.exe /C "sc config ""cygsshd"" start=auto"
+    choco install -y git-lfs
+    C:\\cygwin64\\bin\\bash.exe --login -c  "mkdir ~/.ssh"
+    C:\\cygwin64\\bin\\bash.exe --login -c  "echo 'git.grammatech.com' > ~/.ssh/known_hosts"
+  SHELL
+
+  config.vm.provision "setup-gitlab-runner", type: "shell", inline: <<-SHELL
+    cd $HOME
+    mkdir C:\\GitLab-Runner
+    Invoke-WebRequest https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-windows-amd64.exe -OutFile C:\\GitLab-Runner\\gitlab-runner.exe
+    C:\\GitLab-Runner\\gitlab-runner.exe install
+    C:\\GitLab-Runner\\gitlab-runner.exe start
+    cmd.exe /C 'setx /M PATH "%PATH%;C:\\GitLab-Runner"'
+  SHELL
+
+  config.vm.provision "setup-dev-tools", type: "shell", inline: <<-SHELL
+    choco install -y git
+    choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+    choco install -y ninja
+
+    choco install -y python3 --version "3.6" --allow-multiple-versions
+    choco install -y python3 --version "3.7" --allow-multiple-versions
+    choco install -y python3 --version "3.8" --allow-multiple-versions
+    choco install -y python3 --version "3.9" --allow-multiple-versions
+    choco install -y python3 --version "3.10" --allow-multiple-versions
+
+    choco install -y visualstudio2019buildtools --version=16.8.4.0 --package-parameters "--installPath ""C:\\VS""  --passive --wait --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.CoreBuildTools --add Microsoft.VisualStudio.Component.VC.Redist.14.Latest --add Microsoft.VisualStudio.Component.Windows10SDK --add Microsoft.VisualStudio.Component.Windows10SDK.18362 --includeRecommended"
+  SHELL
+
+  config.vm.provision "build-llvm", type: "shell", inline: <<-SHELL
+    cd $HOME
+    git clone -b llvmorg-14.0.6 --depth 1 https://github.com/llvm/llvm-project.git
+    mkdir llvm-build
+    cd llvm-build
+    cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && cmake -G Ninja ../llvm-project/llvm -DLLVM_ENABLE_DIA_SDK=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo" -DLLVM_ENABLE_RTTI=ON -DLLVM_INCLUDE_BENCHMARKS=OFF
+    cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja"
+    cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && ninja install"
+  SHELL
+end

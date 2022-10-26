@@ -43,7 +43,6 @@ build-linux:
       - mcasm*.whl
     expire_in: 1 week
   script:
-    - python3.6 -m  build --wheel
     - python3.7 -m build --wheel
     - python3.8 -m build --wheel
     - python3.9 -m build --wheel
@@ -54,13 +53,20 @@ build-linux:
 build-windows:
   stage: build
   tags: [mcasm-windows]
+  variables:
+    PYTHON_VERSIONS: "37 38 39 310"
   artifacts:
     paths:
       - mcasm*.whl
   script:
-    - pip3 install -r requirements-dev.txt
-    - pip3 install pipx
-    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && pipx run build --wheel" | tee /dev/null
+    - for version in $PYTHON_VERSIONS; do
+        echo "Building wheel for Python $version";
+        pip="/cygdrive/c/Python${version}/Scripts/pip.exe";
+        pipx=$(cygpath -w "/cygdrive/c/Python${version}/Scripts/pipx.exe");
+        $pip install -r requirements-dev.txt;
+        $pip install pipx;
+        cmd /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && $pipx run build --wheel" | tee /dev/null;
+      done
     - cp dist/mcasm*.whl ./
 
 .test-linux: &test_linux
@@ -74,10 +80,6 @@ build-windows:
     when: always
     reports:
       junit: report.xml
-
-test-linux-py36:
-  image: python:3.6-slim
-  <<: *test_linux
 
 test-linux-py37:
   image: python:3.7-slim

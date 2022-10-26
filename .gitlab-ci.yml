@@ -54,13 +54,20 @@ build-linux:
 build-windows:
   stage: build
   tags: [mcasm-windows]
+  variables:
+    PYTHON_VERSIONS: "37 38 39 310"
   artifacts:
     paths:
       - mcasm*.whl
   script:
-    - pip3 install -r requirements-dev.txt
-    - pip3 install pipx
-    - cmd.exe /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && pipx run build --wheel" | tee /dev/null
+    - for version in $PYTHON_VERSIONS; do
+        echo "Building wheel for Python $version";
+        pip="/cygdrive/c/Python${version}/Scripts/pip.exe";
+        pipx=$(cygpath -w "/cygdrive/c/Python${version}/Scripts/pipx.exe");
+        $pip install -r requirements-dev.txt;
+        $pip install pipx;
+        cmd /C "C:\\VS\\VC\\Auxiliary\\Build\\vcvars64.bat && $pipx run build --wheel" | tee /dev/null;
+      done
     - cp dist/mcasm*.whl ./
 
 .test-linux: &test_linux

@@ -1,4 +1,8 @@
-0.2.2 (UNRELEASED):
+0.2.3 (Unreleased):
+- TBD
+
+0.2.2:
+- Now building windows packages for Python 3.7, 3.8, 3.9, 3.10
 
 0.2.1:
 - Fixed a performance regression added in 0.2.0 that caused creating Assembler

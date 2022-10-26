@@ -43,7 +43,6 @@ build-linux:
       - mcasm*.whl
     expire_in: 1 week
   script:
-    - python3.6 -m  build --wheel
     - python3.7 -m build --wheel
     - python3.8 -m build --wheel
     - python3.9 -m build --wheel
@@ -81,10 +80,6 @@ build-windows:
     when: always
     reports:
       junit: report.xml
-
-test-linux-py36:
-  image: python:3.6-slim
-  <<: *test_linux
 
 test-linux-py37:
   image: python:3.7-slim

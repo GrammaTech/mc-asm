@@ -1,3 +1,6 @@
+0.2.3 (Unreleased):
+- TBD
+
 0.2.2:
 - Now building windows packages for Python 3.7, 3.8, 3.9, 3.10
 

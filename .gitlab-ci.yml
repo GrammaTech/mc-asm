@@ -6,7 +6,7 @@ stages:
 
 default:
   image: $DOCKER_REGISTRY/research/templates/cpp/ubuntu20
-  tags: ["kubernetes"]
+  tags: ['shared']
 
 check-format:
   stage: check-format

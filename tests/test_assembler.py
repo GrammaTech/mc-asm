@@ -1,7 +1,9 @@
+import textwrap
 from unittest.mock import Mock
 
 import mcasm
 import pytest
+from mcasm._core import ParserState
 
 
 class MockAdaptor(mcasm.Streamer):
@@ -118,6 +120,106 @@ def test_anon_symbol():
     assert assignment_symbol.name == "x"
     assert isinstance(value, mcasm.mc.SymbolRefExpr)
     assert value.symbol.name == label_symbol.name
+
+
+def test_explicit_cfi_directives():
+    asm = mcasm.Assembler("x86_64-linux-gnu")
+    streamer = Mock(spec=mcasm.Streamer)
+    asm.implicit_cfi_procedure = False
+    assert asm.assemble(
+        MockAdaptor(streamer),
+        """
+        .cfi_startproc
+        .cfi_undefined 15
+        .cfi_endproc
+        """,
+    )
+
+    all_calls = [call[0] for call in streamer.mock_calls]
+    assert all_calls == [
+        "init_sections",
+        "change_section",
+        "emit_cfi_start_proc_impl",
+        "emit_cfi_undefined",
+        "emit_cfi_end_proc_impl",
+    ]
+
+    assert streamer.emit_cfi_start_proc_impl.called_once()
+    assert streamer.emit_cfi_undefined.called_once()
+    state, register = streamer.emit_cfi_undefined.call_args[0]
+    assert register == 15
+    assert streamer.emit_cfi_end_proc_impl.called_once()
+
+
+def test_implicit_cfi_directives():
+    asm = mcasm.Assembler("x86_64-linux-gnu")
+    streamer = Mock(spec=mcasm.Streamer)
+    asm.implicit_cfi_procedure = True
+    assert asm.assemble(MockAdaptor(streamer), ".cfi_undefined 15")
+
+    all_calls = [call[0] for call in streamer.mock_calls]
+    assert all_calls == [
+        "init_sections",
+        "change_section",
+        "emit_cfi_start_proc_impl",
+        "emit_cfi_undefined",
+        "emit_cfi_end_proc_impl",
+    ]
+
+    assert streamer.emit_cfi_start_proc_impl.called_once()
+    assert streamer.emit_cfi_undefined.called_once()
+    state, register = streamer.emit_cfi_undefined.call_args[0]
+    assert register == 15
+    assert streamer.emit_cfi_end_proc_impl.called_once()
+
+
+def test_implicit_cfi_directives_loc():
+    class Streamer(mcasm.Streamer):
+        def emit_cfi_start_proc_impl(
+            self, state: ParserState, cur_frame: mcasm.mc.DwarfFrameInfo
+        ) -> None:
+            assert state.loc is None
+            super().emit_cfi_start_proc_impl(state, cur_frame)
+
+        def emit_cfi_end_proc_impl(
+            self, state: ParserState, cur_frame: mcasm.mc.DwarfFrameInfo
+        ) -> None:
+            assert state.loc is None
+            super().emit_cfi_end_proc_impl(state, cur_frame)
+
+    asm = mcasm.Assembler("x86_64-linux-gnu")
+    asm.implicit_cfi_procedure = True
+    assert asm.assemble(Streamer(), ".cfi_undefined 15")
+
+
+def test_explicit_cfi_directives_loc():
+    class Streamer(mcasm.Streamer):
+        def emit_cfi_start_proc_impl(
+            self, state: ParserState, cur_frame: mcasm.mc.DwarfFrameInfo
+        ) -> None:
+            assert state.loc is not None
+            assert state.loc.lineno == 1
+            super().emit_cfi_start_proc_impl(state, cur_frame)
+
+        def emit_cfi_end_proc_impl(
+            self, state: ParserState, cur_frame: mcasm.mc.DwarfFrameInfo
+        ) -> None:
+            assert state.loc is not None
+            assert state.loc.lineno == 3
+            super().emit_cfi_end_proc_impl(state, cur_frame)
+
+    asm = mcasm.Assembler("x86_64-linux-gnu")
+    asm.implicit_cfi_procedure = False
+    assert asm.assemble(
+        Streamer(),
+        textwrap.dedent(
+            """\
+            .cfi_startproc
+            .cfi_undefined 15
+            .cfi_endproc
+            """
+        ),
+    )
 
 
 def test_parse_error():

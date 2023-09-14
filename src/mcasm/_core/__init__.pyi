@@ -1,32 +1,20 @@
 from __future__ import annotations
-import mcasm._core
-import mcasm._core.mc as mc
 import typing
+from . import mc
 
 __all__ = ["Assembler", "ParserState", "Streamer", "X86Syntax", "mc"]
 
 class Assembler:
-    def __init__(self, triple: str) -> None: ...
-    def assemble(self, streamer: Streamer, asm: str) -> bool: ...
+    implicit_cfi_procedure: bool
+    x86_syntax: X86Syntax
     @staticmethod
     def default_triple() -> str: ...
-    @property
-    def x86_syntax(self) -> X86Syntax:
-        """
-        :type: X86Syntax
-        """
-    @x86_syntax.setter
-    def x86_syntax(self, arg1: X86Syntax) -> None:
-        pass
-    pass
+    def __init__(self, triple: str) -> None: ...
+    def assemble(self, streamer: Streamer, asm: str) -> bool: ...
 
 class ParserState:
     @property
-    def loc(self) -> mc.SourceLocation:
-        """
-        :type: mc.SourceLocation
-        """
-    pass
+    def loc(self) -> mc.SourceLocation: ...
 
 class Streamer:
     def __init__(self) -> None: ...
@@ -40,7 +28,10 @@ class Streamer:
         self, state: ParserState, symbol: mc.Symbol
     ) -> None: ...
     def change_section(
-        self, state: ParserState, section: mc.Section, subsection: typing.Optional[mc.Expr]
+        self,
+        state: ParserState,
+        section: mc.Section,
+        subsection: typing.Optional[mc.Expr],
     ) -> None: ...
     def diagnostic(self, state: ParserState, diag: mc.Diagnostic) -> None: ...
     def emit_absolute_symbol_diff(
@@ -82,7 +73,7 @@ class Streamer:
     def emit_cfi_end_proc_impl(
         self, state: ParserState, cur_frame: mc.DwarfFrameInfo
     ) -> None: ...
-    def emit_cfi_escape(self, state: ParserState, values: str) -> None: ...
+    def emit_cfi_escape(self, state: ParserState, values: bytes) -> None: ...
     def emit_cfi_gnu_args_size(
         self, state: ParserState, size: int
     ) -> None: ...
@@ -473,7 +464,9 @@ class Streamer:
     def init_sections(
         self, state: ParserState, no_exec_stack: bool
     ) -> None: ...
-    pass
+    def unhandled_event(
+        self, name: typing.Any, base_impl: typing.Callable, *args
+    ) -> typing.Any: ...
 
 class X86Syntax:
     """
@@ -484,26 +477,22 @@ class X86Syntax:
       INTEL
     """
 
-    def __eq__(self, other: object) -> bool: ...
+    ATT: typing.ClassVar[X86Syntax]  # value = <X86Syntax.ATT: 0>
+    INTEL: typing.ClassVar[X86Syntax]  # value = <X86Syntax.INTEL: 1>
+    __members__: typing.ClassVar[
+        dict[str, X86Syntax]
+    ]  # value = {'ATT': <X86Syntax.ATT: 0>, 'INTEL': <X86Syntax.INTEL: 1>}
+    def __eq__(self, other: typing.Any) -> bool: ...
     def __getstate__(self) -> int: ...
     def __hash__(self) -> int: ...
     def __index__(self) -> int: ...
     def __init__(self, value: int) -> None: ...
     def __int__(self) -> int: ...
-    def __ne__(self, other: object) -> bool: ...
+    def __ne__(self, other: typing.Any) -> bool: ...
     def __repr__(self) -> str: ...
     def __setstate__(self, state: int) -> None: ...
+    def __str__(self) -> str: ...
     @property
-    def name(self) -> str:
-        """
-        :type: str
-        """
+    def name(self) -> str: ...
     @property
-    def value(self) -> int:
-        """
-        :type: int
-        """
-    ATT: mcasm._core.X86Syntax  # value = <X86Syntax.ATT: 0>
-    INTEL: mcasm._core.X86Syntax  # value = <X86Syntax.INTEL: 1>
-    __members__: dict  # value = {'ATT': <X86Syntax.ATT: 0>, 'INTEL': <X86Syntax.INTEL: 1>}
-    pass
+    def value(self) -> int: ...

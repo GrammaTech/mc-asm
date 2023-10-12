@@ -123,6 +123,9 @@ def test_anon_symbol():
 
 
 def test_explicit_cfi_directives():
+    """
+    Test that explicit CFI procedures trigger the correct callbacks.
+    """
     asm = mcasm.Assembler("x86_64-linux-gnu")
     streamer = Mock(spec=mcasm.Streamer)
     asm.implicit_cfi_procedure = False
@@ -152,6 +155,9 @@ def test_explicit_cfi_directives():
 
 
 def test_implicit_cfi_directives():
+    """
+    Test that implicit CFI procedures trigger the correct callbacks.
+    """
     asm = mcasm.Assembler("x86_64-linux-gnu")
     streamer = Mock(spec=mcasm.Streamer)
     asm.implicit_cfi_procedure = True
@@ -174,6 +180,10 @@ def test_implicit_cfi_directives():
 
 
 def test_implicit_cfi_directives_loc():
+    """
+    Test that implicit CFI procedures have no source location associated.
+    """
+
     class Streamer(mcasm.Streamer):
         def emit_cfi_start_proc_impl(
             self, state: ParserState, cur_frame: mcasm.mc.DwarfFrameInfo
@@ -193,6 +203,10 @@ def test_implicit_cfi_directives_loc():
 
 
 def test_explicit_cfi_directives_loc():
+    """
+    Test that explicit CFI procedures have correct source locations.
+    """
+
     class Streamer(mcasm.Streamer):
         def emit_cfi_start_proc_impl(
             self, state: ParserState, cur_frame: mcasm.mc.DwarfFrameInfo

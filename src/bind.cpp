@@ -156,15 +156,6 @@ void emit_raw_text_impl(std::shared_ptr<ParserState> State,
       State, String);
 }
 
-std::shared_ptr<mc::Symbol> emit_cfi_label(std::shared_ptr<ParserState> State) {
-  return py_dispatch(
-      __func__,
-      [](std::shared_ptr<ParserState> State) {
-        return mc::wrap(State, State->Str->MCStreamer::emitCFILabel());
-      },
-      State);
-}
-
 void add_comment(std::shared_ptr<ParserState> State, std::string_view Comment,
                  bool EOL) {
   py_dispatch(
@@ -1239,14 +1230,14 @@ void emit_cfi_adjust_cfa_offset(std::shared_ptr<ParserState> State,
       State, Adjustment);
 }
 
-void emit_cfi_escape(std::shared_ptr<ParserState> State,
-                     std::string_view Values) {
+void emit_cfi_escape(std::shared_ptr<ParserState> State, py::bytes Values) {
   py_dispatch(
       __func__,
-      [](std::shared_ptr<ParserState> State, std::string_view Values) {
-        State->Str->MCStreamer::emitCFIEscape(Values);
+      [](std::shared_ptr<ParserState> State, py::bytes Values) {
+        State->Str->MCStreamer::emitCFIEscape(
+            static_cast<std::string_view>(Values));
       },
-      State, Values);
+      State, py::bytes(Values));
 }
 
 void emit_cfi_return_column(std::shared_ptr<ParserState> State,
@@ -1737,10 +1728,6 @@ public:
     dispatch(&PyStreamer::emit_raw_text_impl, String);
   }
 
-  MCSymbol* emitCFILabel() override {
-    return unwrap(dispatch(&PyStreamer::emit_cfi_label));
-  }
-
   void AddComment(const Twine& T, bool EOL = true) override {
     std::string TStr = T.str();
     dispatch(&PyStreamer::add_comment, TStr, EOL);
@@ -2229,7 +2216,8 @@ public:
   }
 
   void emitCFIEscape(StringRef Values) override {
-    dispatch(&PyStreamer::emit_cfi_escape, Values);
+    dispatch(&PyStreamer::emit_cfi_escape,
+             py::bytes(Values.data(), Values.size()));
   }
 
   void emitCFIReturnColumn(int64_t Register) override {
@@ -2499,7 +2487,24 @@ public:
 
     State->Parser->setTargetParser(*State->TAP);
 
-    int Res = State->Parser->Run(/*NoInitialTextSection=*/false);
+    State->Str->initSections(false, *State->STI);
+
+    bool HasImplicitCFIProcedure = ImplicitCFIProcedure;
+    if (HasImplicitCFIProcedure) {
+      State->Str->PushSection();
+      State->Str->emitCFIStartProc(/*Simple=*/false);
+    }
+
+    int Res =
+        State->Parser->Run(/*NoInitialTextSection=*/true, /*NoFinalize=*/true);
+    State->Str->setStartTokLocPtr(nullptr);
+    if (!Res && HasImplicitCFIProcedure) {
+      State->Str->PopSection();
+      State->Str->emitCFIEndProc();
+    }
+    if (!Res) {
+      State->Str->Finish(State->Parser->getLexer().getLoc());
+    }
     if (PyErr_Occurred())
       throw py::error_already_set();
     return Res == 0;
@@ -2510,6 +2515,9 @@ public:
 
   static std::string default_target() { return sys::getDefaultTargetTriple(); }
 
+  bool get_implicit_cfi_procedure() const { return ImplicitCFIProcedure; }
+  void set_implicit_cfi_procedure(bool Value) { ImplicitCFIProcedure = Value; }
+
 private:
   static void DiagCallback(const SMDiagnostic& Diag, void* Context) {
     static_cast<StreamerAdaptor*>(Context)->diagCallback(Diag);
@@ -2518,6 +2526,7 @@ private:
   const Target* TheTarget = nullptr;
   Triple TheTriple;
   X86Syntax Syntax = X86Syntax::ATT;
+  bool ImplicitCFIProcedure = false;
 };
 
 PYBIND11_MODULE(_core, m) {
@@ -2550,9 +2559,6 @@ PYBIND11_MODULE(_core, m) {
       .def("emit_raw_text_impl",
            &PyStreamer::emit_raw_text_impl,
            "state"_a, "string"_a)
-      .def("emit_cfi_label",
-           &PyStreamer::emit_cfi_label,
-           "state"_a)
       .def("add_comment",
            &PyStreamer::add_comment,
            "state"_a, "comment"_a, "eol"_a)
@@ -3026,6 +3032,9 @@ PYBIND11_MODULE(_core, m) {
       .def_property("x86_syntax",
                     &Assembler::get_x86_syntax,
                     &Assembler::set_x86_syntax)
+      .def_property("implicit_cfi_procedure",
+                    &Assembler::get_implicit_cfi_procedure,
+                    &Assembler::set_implicit_cfi_procedure)
       .def_static("default_triple",
                   &Assembler::default_target);
   // clang-format on

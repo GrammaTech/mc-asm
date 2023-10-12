@@ -1,5 +1,6 @@
-0.2.3 (Unreleased):
-- TBD
+0.3.0 (Unreleased):
+- Added an Assembler property for allowing an implicit CFI procedure for the
+  text section
 
 0.2.2:
 - Now building windows packages for Python 3.7, 3.8, 3.9, 3.10

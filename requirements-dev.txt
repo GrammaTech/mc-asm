@@ -5,6 +5,8 @@ pkginfo
 pre-commit
 pytest
 pytest-cov
+# Work around twine->readme-renderer->nh3 requiring rust due to lack of wheels
+readme-renderer<42
 requests
 twine
 types-setuptools
